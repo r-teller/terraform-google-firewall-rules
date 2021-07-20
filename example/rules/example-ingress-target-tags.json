@@ -1,0 +1,23 @@
+[
+    {
+        "id": "44444",
+        "description": "This rule will allow all traffic from 192.168.13.0/32 and instances tagged with some_network_tag to some_network_tag",
+        "action": "allow",
+        "direction": "INGRESS",
+        "log_config": "EXCLUDE_ALL_METADATA",
+        "priority": 1000,
+        "sources": [
+            "192.168.13.0/32",
+            "some-network-tag"
+        ],
+        "targets": [
+            "some-network-tag"
+        ],
+        "rules": [
+            {
+                "protocol": "TCP",
+                "ports": ["80","8080-8088"]
+            }
+        ]
+    }
+]

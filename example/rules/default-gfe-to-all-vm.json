@@ -1,0 +1,27 @@
+[
+    {
+        "id": "fffc",
+        "description": "This rule will allow GFE ranges access to all VMs and Ports, GFE is used for Cloud Load Balancing.",
+        "action": "allow",
+        "direction": "ingress",
+        "log_config": "EXCLUDE_ALL_METADATA",
+        "priority": 65530,
+        "sources": [
+            "35.191.0.0/16",
+            "130.211.0.0/22",
+            "209.85.152.0/22",
+            "209.85.204.0/22"
+        ],
+        "targets": [ ],
+        "rules": [
+            {
+                "protocol": "TCP",
+                "ports": []
+            },
+            {
+                "protocol": "UDP",
+                "ports": []
+            }
+        ]
+    }
+]

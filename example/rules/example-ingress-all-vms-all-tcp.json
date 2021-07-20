@@ -1,0 +1,20 @@
+[
+    {
+        "id": "555555",
+        "description": "This rule will allow all traffic from 0.0.0.0/0 (ALL Source Subnets) to ALL instances on all TCP Ports",
+        "action": "allow",
+        "direction": "INGRESS",
+        "log_config": "EXCLUDE_ALL_METADATA",
+        "priority": 1000,
+        "sources": [
+            "0.0.0.0/0"
+        ],
+        "targets": [ ],
+        "rules": [
+            {
+                "protocol": "TCP",
+                "ports": [ ]
+            }
+        ]
+    }
+]

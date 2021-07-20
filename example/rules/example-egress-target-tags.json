@@ -1,0 +1,23 @@
+[
+    {
+        "id": "222222",
+        "description": "This rule will allow all traffic from some_network_tag to 192.168.13.0/32 and instances tagged with some_network_tag",
+        "action": "allow",
+        "direction": "EGRESS",
+        "log_config": "EXCLUDE_ALL_METADATA",
+        "priority": 1000,
+        "sources": [
+            "some-network-tag"
+        ],
+        "targets": [
+            "192.168.13.0/32",
+            "some-network-tag"
+        ],
+        "rules": [
+            {
+                "protocol": "TCP",
+                "ports": ["80","8080-8088"]
+            }
+        ]
+    }
+]
