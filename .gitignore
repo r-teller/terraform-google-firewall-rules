@@ -14,5 +14,4 @@
 
 # outputs directory used to compare rules that are not managed by this terraform module
 **/outputs/*
-
-!**/outputs
+!**/outputs/.gitkeep
