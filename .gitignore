@@ -1,0 +1,18 @@
+# .terraform directory
+**/.terraform/*
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+
+# terraform lock file
+*.terraform.lock.*
+
+# .temp directory
+**/.temp/*
+
+
+# outputs directory used to compare rules that are not managed by this terraform module
+**/outputs/*
+
+!**/outputs

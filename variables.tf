@@ -6,6 +6,6 @@ variable "project_id" {
   description = "Project id of the project that holds the network."
 }
 
-variable "firewall_rules" {
-    description = "Collection of Firewall rules that need to be created"
+variable "firewall_rule" {
+    description = "Firewall rule that need to be created"
 }
