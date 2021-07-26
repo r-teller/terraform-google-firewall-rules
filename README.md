@@ -72,9 +72,9 @@ module "firewall_rules" {
 |------|-------------|------|---------|---------|:--------:|
 | id | unique identifier for this rule within the json file | `String` | N/A | `uniqueid111` | yes |
 | description | Description of what the rule is intended to do | `String` | `null` | `Description of firewall rule` | no |
-| action | The action for the firewall rule | `ENUM(allow, deny)` | N/A | `allow` | yes |
-| direction | The direction for the firewall rule | `ENUM(INGRESS, EGRESS)` | N/A | `INGRESS` | yes |
-| log_config | This field denotes whether logging is enabled and if to include or exclude metadata for firewall logs. | `ENUM(EXCLUDE_ALL_METADATA, INCLUDE_ALL_METADATA, DISABLED)` | `DISABLED` | `INCLUDE_ALL_METADATA` | no |
+| action | The action for the firewall rule | `ENUM(`<br>&emsp;`allow,`<br>&emsp;`deny`<br>`)` | N/A | `allow` | yes |
+| direction | The direction for the firewall rule | `ENUM(`<br>&emsp;`INGRESS,`<br>&emsp;`EGRESS`<br>`)` | N/A | `INGRESS` | yes |
+| log_config | This field denotes whether logging is enabled and if to include or exclude metadata for firewall logs. | `ENUM(`<br>&emsp;`EXCLUDE_ALL_METADATA,`<br>&emsp;`INCLUDE_ALL_METADATA,`<br>&emsp;`DISABLED`<br>`)` | `DISABLED` | `INCLUDE_ALL_METADATA` | no |
 | priority | This field denotes whether to include or exclude metadata for firewall logs. | `Number` | `1000` | `1000` | no |
 | disabled | Denotes whether the firewall rule is disabled, i.e not applied to the network it is associated with. | `Boolean` | `false` | `false` | no |
 | sources | A list of instance tags, service accounts or subnet ranges indicating source resources that may make network connections | `list(String)` | N/A | `[]` | yes |
