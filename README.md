@@ -79,7 +79,7 @@ module "firewall_rules" {
 | disabled | Denotes whether the firewall rule is disabled, i.e not applied to the network it is associated with. | `Boolean` | `false` | `false` | no |
 | sources | A list of instance tags, service accounts or subnet ranges indicating source resources that may make network connections | `list(String)` | N/A | `[]` | yes |
 | targets | A list of instance tags, service accounts or subnet ranges indicating target resources that may recieve network connections | `list(String)` | N/A | `[]` | yes |
-| rules | A list of protocols and optional list of ports to which this rule applies. Each ports entry must be either an integer or a range. | `list(Object{protocol=String,ports=list(String)})` | N/A | `[{protocol=TCP,ports=[80,443]}]` | yes |
+| rules | A list of protocols and optional list of ports to which this rule applies. Each ports entry must be either an integer or a range. | `list(Object{`<br>&emsp;`protocol=String,`<br>&emsp;`ports=list(String)`<br>`})` | N/A | `[{protocol=TCP,ports=[80,443]}]` | yes |
 
 ## Bonus Example
 Using the local_file resource you can output the created rules to a JSON file and then use the provided PowerShell script to compare Firewall Rules managed by this Terraform Module and any existing rules in GCP to identify any unmanaged rules.
