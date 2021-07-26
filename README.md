@@ -68,23 +68,23 @@ module "firewall_rules" {
 | firewall_rule | Firewall Rule object to be passed to the Firewall Rules Module | `object` | yes |
 
 ### Firewall Rule Object Format
-| Name | Description | Type | Default | Example | Required |
-|------|-------------|------|---------|---------|:--------:|
-| id | unique identifier for this rule within the json file | `String` | N/A | `uniqueid111` | yes |
-| description | Description of what the rule is intended to do | `String` | `null` | `Description of firewall rule` | no |
-| action | The action for the firewall rule | `ENUM(`<br>&emsp;`allow,`<br>&emsp;`deny`<br>`)` | N/A | `allow` | yes |
-| direction | The direction for the firewall rule | `ENUM(`<br>&emsp;`INGRESS,`<br>&emsp;`EGRESS`<br>`)` | N/A | `INGRESS` | yes |
-| log_config | This field denotes whether logging is enabled and if to include or exclude metadata for firewall logs. | `ENUM(`<br>&emsp;`EXCLUDE_ALL_METADATA,`<br>&emsp;`INCLUDE_ALL_METADATA,`<br>&emsp;`DISABLED`<br>`)` | `DISABLED` | `INCLUDE_ALL_METADATA` | no |
-| priority | This field denotes whether to include or exclude metadata for firewall logs. | `Number` | `1000` | `1000` | no |
-| disabled | Denotes whether the firewall rule is disabled, i.e not applied to the network it is associated with. | `Boolean` | `false` | `false` | no |
-| sources | A list of instance tags, service accounts or subnet ranges indicating source resources that may make network connections | `list(String)` | N/A | `[]` | yes |
-| targets | A list of instance tags, service accounts or subnet ranges indicating target resources that may recieve network connections | `list(String)` | N/A | `[]` | yes |
-| rules | A list of protocols and optional list of ports to which this rule applies. Each ports entry must be either an integer or a range. | `list(Object{`<br>&emsp;`protocol=String,`<br>&emsp;`ports=list(String)`<br>`})` | N/A | `[{protocol=TCP,ports=[80,443]}]` | yes |
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| id | unique identifier for this rule within the json file | `String` | N/A | yes |
+| description | Description of what the rule is intended to do | `String` | `null` | no |
+| action | The action for the firewall rule | `allow or deny` | N/A | yes |
+| direction | The direction for the firewall rule | `INGRESS or EGRESS` | N/A | yes |
+| log_config | This field denotes whether logging is enabled and if to include or exclude metadata for firewall logs. | `EXCLUDE_ALL_METADATA, INCLUDE_ALL_METADATA or DISABLED` | `DISABLED` | no |
+| priority | This field denotes whether to include or exclude metadata for firewall logs. | `Number` | `1000` | no |
+| disabled | Denotes whether the firewall rule is disabled, i.e not applied to the network it is associated with. | `Boolean` | `false` | no |
+| sources | A list of instance tags, service accounts or subnet ranges indicating source resources that may initiate network connections | `list(String)` | N/A | yes |
+| targets | A list of instance tags, service accounts or subnet ranges indicating target resources that may recieve network connections | `list(String)` | N/A |  yes |
+| rules | A list of protocols and optional list of ports to which this rule applies. Each ports entry must be either an integer, range or an empty list `[]` to indicate all ports for the given protocol. | `list(Object{protocol=String, ports=list(String)})` | N/A | yes |
 
 ## Bonus Example
 Using the local_file resource you can output the created rules to a JSON file and then use the provided PowerShell script to compare Firewall Rules managed by this Terraform Module and any existing rules in GCP to identify any unmanaged rules.
 
-*Note:* This section expects an `ouputs` directory to exist as a valid target for JSON files
+*Note:* This section expects an `ouputs` directory to exist as a valid target for JSON file output
 
 ```hcl
 locals {
@@ -115,6 +115,7 @@ resource "local_file" "rules_json" {
 ```
 
 ```powershell
+## PowerShell example
 pwsh .\unmanaged_rules.ps1
 
 project                network                        unmanaged firewall rule      disabled
