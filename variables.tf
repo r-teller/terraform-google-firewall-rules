@@ -7,5 +7,5 @@ variable "project_id" {
 }
 
 variable "firewall_rule" {
-    description = "Firewall rule that need to be created"
+  description = "Firewall rule that need to be created"
 }

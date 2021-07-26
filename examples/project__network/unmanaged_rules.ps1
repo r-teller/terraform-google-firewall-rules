@@ -7,7 +7,7 @@ gcloud compute firewall-rules list --project $project_id --filter="network~'proj
 $activeRules=Get-Content .\outputs\active.json | ConvertFrom-JSON
 $managedRules=Get-Content .\outputs\managed.json | ConvertFrom-JSON
 
-$unmanagedRules=$activeRules.name | ?{$managedRules.name -notcontains $_}
+$unmanagedRules=$activeRules.name | Where-Object {$managedRules.name -notcontains $_}
 
 $_network=@{label="network";expression={$_.network.split("/")[-1]}}
 $_project=@{label="project";expression={$_.network.split("/")[6]}}

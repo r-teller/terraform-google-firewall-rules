@@ -1,5 +1,39 @@
-# terraform-google-firewall-rule
-Terraform module that provides an simplified approach for creating firewall rules in GCP
+# Google Cloud VPC Firewall Rules
+This module that provides a simplified approach for creating/managing firewall rules in GCP. 
+
+It supports mixed values in both the source and target JSON field and uses string matching to determine type, types and logic listed below....
+-  service_accounts = `if length(split("@", x)) > 1`
+-  tags             = `if length(split("@", x)) < 2 && !can(cidrnetmask(x))`
+-  subnet_ranges    = `if can(cidrnetmask(x))`
+
+## Example Json Firewall Rule
+Firewall Rules must be formated as valid JSON and added to a directory called `rules`. The `id` field must be unique within a given JSON file but does not need to be globaly unique.
+
+```json
+[
+    {
+        "id": "1111111",
+        "description": "This rule will allow all traffic from service-account-name@project-id.iam.gserviceaccount.com to 192.168.13.0/32 and instances running with service-account service-account-name@project-id.iam.gserviceaccount.com ",
+        "action": "allow",
+        "direction": "EGRESS",
+        "log_config": "EXCLUDE_ALL_METADATA",
+        "priority": 1000,
+        "sources": [
+            "service-account-name@project-id.iam.gserviceaccount.com"
+        ],
+        "targets": [
+            "192.168.13.0/32",
+            "service-account-name@project-id.iam.gserviceaccount.com"
+        ],
+        "rules": [
+            {
+                "protocol": "TCP",
+                "ports": ["80","8080-8088"]
+            }
+        ]
+    }
+]
+```
 
 ## Usage
 Basic usage of this module is as follows:
@@ -47,35 +81,10 @@ module "firewall_rules" {
 | targets | A list of instance tags, service accounts or subnet ranges indicating target resources that may recieve network connections | `list(String)` | N/A | `[]` | yes |
 | rules | A list of protocols and optional list of ports to which this rule applies. Each ports entry must be either an integer or a range. | `list(Object{protocol=String,ports=list(String)})` | N/A | `[{protocol=TCP,ports=[80,443]}]` | yes |
 
-#### Example Json Firewall Rule
-```json
-[
-    {
-        "id": "1111111",
-        "description": "This rule will allow all traffic from service-account-name@project-id.iam.gserviceaccount.com to 192.168.13.0/32 and instances running with service-account service-account-name@project-id.iam.gserviceaccount.com ",
-        "action": "allow",
-        "direction": "EGRESS",
-        "log_config": "EXCLUDE_ALL_METADATA",
-        "priority": 1000,
-        "sources": [
-            "service-account-name@project-id.iam.gserviceaccount.com"
-        ],
-        "targets": [
-            "192.168.13.0/32",
-            "service-account-name@project-id.iam.gserviceaccount.com"
-        ],
-        "rules": [
-            {
-                "protocol": "TCP",
-                "ports": ["80","8080-8088"]
-            }
-        ]
-    }
-]
-```
-
 ## Bonus Example
-You can output the created rules to a JSON file and then compare with existing rules in GCP to identify any Firewall Rules not managed by this terraform module
+Using the local_file resource you can output the created rules to a JSON file and then use the provided PowerShell script to compare Firewall Rules managed by this Terraform Module and any existing rules in GCP to identify any unmanaged rules.
+
+*Note:* This section expects an `ouputs` directory to exist as a valid target for JSON files
 
 ```hcl
 locals {
