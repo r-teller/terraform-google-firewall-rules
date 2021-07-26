@@ -1,0 +1,29 @@
+[
+    {
+        "id": "555555",
+        "description": "This rule will allow all traffic from vpc-connecotr network tag to VPC Connector Subnets",
+        "action": "allow",
+        "direction": "egress",
+        "log_config": "DISABLED",
+        "priority": 1000,
+        "sources": [ "vpc-connector" ],
+        "targets": [ 
+            "107.178.230.64/26", 
+            "35.199.224.0/19"
+        ],
+        "rules": [
+            {
+                "protocol": "TCP",
+                "ports": ["667"]
+            },
+            {
+                "protocol": "UDP",
+                "ports": ["665-666"]
+            },
+            {
+                "protocol": "ICMP",
+                "ports": [ ]
+            }
+        ]
+    }
+]

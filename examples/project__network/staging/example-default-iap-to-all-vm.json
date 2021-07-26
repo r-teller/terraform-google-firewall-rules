@@ -1,7 +1,7 @@
 [
     {
         "id": "fffb",
-        "description": "This rule will allow IAP ranges access to all VMs on common ports.",
+        "description": "This rule will allow IAP ranges access to all VMs on all ports.",
         "action": "allow",
         "direction": "ingress",
         "log_config": "EXCLUDE_ALL_METADATA",
@@ -13,7 +13,7 @@
         "rules": [
             {
                 "protocol": "TCP",
-                "ports": [22,80,443,1434,4022,135,1434,4443,8080,8081,8088,8443,5432,3306]
+                "ports": []
             }
         ]
     }

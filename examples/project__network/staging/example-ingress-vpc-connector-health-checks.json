@@ -1,0 +1,22 @@
+[
+    {
+        "id": "555555",
+        "description": "This rule will allow all traffic from VPC Connector Subnets to vpc-connecotr network tag on TCP Port 667",
+        "action": "allow",
+        "direction": "INGRESS",
+        "log_config": "DISABLED",
+        "priority": 1000,
+        "sources": [
+            "130.211.0.0/22",
+            "35.191.0.0/16",
+            "108.170.220.0/23"
+        ],
+        "targets": [ "vpc-connector" ],
+        "rules": [
+            {
+                "protocol": "TCP",
+                "ports": ["667"]
+            }
+        ]
+    }
+]
