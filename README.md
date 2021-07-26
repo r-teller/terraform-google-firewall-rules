@@ -1,2 +1,115 @@
 # terraform-google-firewall-rule
 Terraform module that provides an simplified approach for creating firewall rules in GCP
+
+## Usage
+Basic usage of this module is as follows:
+
+```hcl
+locals {
+    firewall_rule_path = "./rules"
+    firewall_rule_sets = fileset(local.firewall_rule_path,"*")
+    firewall_rules = flatten([ for rules in local.firewall_rule_sets: [
+            for rule in jsondecode(file("${local.firewall_rule_path}/${rules}")): 
+                merge(rule,{fileName=split(".",rules)[0]})
+            ]    
+    ])
+}
+
+module "firewall_rules" { 
+    source  = "r-teller/firewall-rules/google"
+
+    project_id      = var.project_id
+    network         = var.network
+
+    for_each        = { for rule in local.firewall_rules:  "${rule.fileName}--${rule.id}" => rule }
+    firewall_rule  = each.value
+}
+```
+
+## Module Inputs
+| Name | Description | Type | Required |
+|------|-------------|------|:--------:|
+| project_id | Project id of the project that holds the network. | `string` | yes |
+| network | Name of the network this set of firewall rules applies to. | `string` | yes |
+| firewall_rule | Firewall Rule object to be passed to the Firewall Rules Module | `object` | yes |
+
+### Firewall Rule Object Format
+| Name | Description | Type | Default | Example | Required |
+|------|-------------|------|---------|---------|:--------:|
+| id | unique identifier for this rule within the json file | `String` | N/A | `uniqueid111` | yes |
+| description | Description of what the rule is intended to do | `String` | `null` | `Description of firewall rule` | no |
+| action | The action for the firewall rule | `ENUM(allow, deny)` | N/A | `allow` | yes |
+| direction | The direction for the firewall rule | `ENUM(INGRESS, EGRESS)` | N/A | `INGRESS` | yes |
+| log_config | This field denotes whether logging is enabled and if to include or exclude metadata for firewall logs. | `ENUM(EXCLUDE_ALL_METADATA, INCLUDE_ALL_METADATA, DISABLED)` | `DISABLED` | `INCLUDE_ALL_METADATA` | no |
+| priority | This field denotes whether to include or exclude metadata for firewall logs. | `Number` | `1000` | `1000` | no |
+| disabled | Denotes whether the firewall rule is disabled, i.e not applied to the network it is associated with. | `Boolean` | `false` | `false` | no |
+| sources | A list of instance tags, service accounts or subnet ranges indicating source resources that may make network connections | `list(String)` | N/A | `[]` | yes |
+| targets | A list of instance tags, service accounts or subnet ranges indicating target resources that may recieve network connections | `list(String)` | N/A | `[]` | yes |
+| rules | A list of protocols and optional list of ports to which this rule applies. Each ports entry must be either an integer or a range. | `list(Object{protocol=String,ports=list(String)})` | N/A | `[{protocol=TCP,ports=[80,443]}]` | yes |
+
+#### Example Json Firewall Rule
+```json
+[
+    {
+        "id": "1111111",
+        "description": "This rule will allow all traffic from service-account-name@project-id.iam.gserviceaccount.com to 192.168.13.0/32 and instances running with service-account service-account-name@project-id.iam.gserviceaccount.com ",
+        "action": "allow",
+        "direction": "EGRESS",
+        "log_config": "EXCLUDE_ALL_METADATA",
+        "priority": 1000,
+        "sources": [
+            "service-account-name@project-id.iam.gserviceaccount.com"
+        ],
+        "targets": [
+            "192.168.13.0/32",
+            "service-account-name@project-id.iam.gserviceaccount.com"
+        ],
+        "rules": [
+            {
+                "protocol": "TCP",
+                "ports": ["80","8080-8088"]
+            }
+        ]
+    }
+]
+```
+
+## Bonus Example
+You can output the created rules to a JSON file and then compare with existing rules in GCP to identify any Firewall Rules not managed by this terraform module
+
+```hcl
+locals {
+    firewall_rule_path = "./rules"
+    firewall_rule_sets = fileset(local.firewall_rule_path,"*")
+    firewall_rules = flatten([ for rules in local.firewall_rule_sets: [
+            for rule in jsondecode(file("${local.firewall_rule_path}/${rules}")): 
+                merge(rule,{fileName=split(".",rules)[0]})
+            ]    
+    ])
+}
+
+module "firewall_rules" { 
+    source  = "r-teller/firewall-rules/google"
+
+    project_id      = var.project_id
+    network         = var.network
+
+    for_each        = { for rule in local.firewall_rules:  "${rule.fileName}--${rule.id}" => rule }
+    firewall_rule  = each.value
+}
+
+### Creates JSON file that contains a list of all configured rules
+resource "local_file" "rules_json" {
+    content     = jsonencode((values(module.firewall_rules)).*.firewall_rule)
+    filename = "${path.module}/outputs/managed.json"
+}
+```
+
+```powershell
+pwsh .\unmanaged_rules.ps1
+
+project                network                        unmanaged firewall rule      disabled
+-------                -------                        -----------------------      --------
+rteller-demo-host-aaaa bridged-vpc-ic-remote-vpc-5b78 bridged-vpc-icr-echo-fw-5b78    False
+rteller-demo-host-aaaa bridged-vpc-ic-remote-vpc-5b78 bridged-vpc-icr-iap-fw-5b78     False
+```
