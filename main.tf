@@ -14,7 +14,7 @@ locals {
 }
 
 resource "google_compute_firewall" "firewall_rule" {
-  name    = "${var.firewall_rule.fileName}--${var.firewall_rule.id}"
+  name    = "${var.firewall_rule.fileName}--${var.network}--${var.firewall_rule.id}"
   project = var.project_id
   network = var.network
 
@@ -30,7 +30,7 @@ resource "google_compute_firewall" "firewall_rule" {
   target_service_accounts = length(local.target_service_accounts) > 0 && local.rule_direction == "INGRESS" ? local.target_service_accounts : length(local.source_service_accounts) > 0 && local.rule_direction == "EGRESS" ? local.source_service_accounts : null
 
   dynamic "log_config" {
-    for_each = can(var.firewall_rule.log_config) && upper(var.firewall_rule.log_config) != "DISABLED" ? [1] : []
+    for_each = can(var.firewall_rule.log_config) ? upper(var.firewall_rule.log_config) != "DISABLED" ? [1] : [] : []
     content {
       metadata = var.firewall_rule.log_config
     }

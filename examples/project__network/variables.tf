@@ -1,7 +1,7 @@
 variable "project_id" {
-    type = string
+  type = string
 }
 
 variable "network" {
-    type = string
+  type = string
 }
