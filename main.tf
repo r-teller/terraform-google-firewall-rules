@@ -40,7 +40,7 @@ resource "google_compute_firewall" "firewall_rule" {
     for_each = [for rule in var.firewall_rule.rules : rule if local.rule_action == "allow"]
     iterator = rule
     content {
-      protocol = rule.value.protocol
+      protocol = lower(rule.value.protocol)
       ports    = rule.value.ports
     }
   }
@@ -48,7 +48,7 @@ resource "google_compute_firewall" "firewall_rule" {
     for_each = [for rule in var.firewall_rule.rules : rule if local.rule_action == "deny"]
     iterator = rule
     content {
-      protocol = rule.value.protocol
+      protocol = lower(rule.value.protocol)
       ports    = rule.value.ports
     }
   }
