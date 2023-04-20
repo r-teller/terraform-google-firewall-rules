@@ -1,6 +1,6 @@
 locals {
   firewall_rule_path = "./rules"
-  firewall_rule_sets = fileset(local.firewall_rule_path, "*")
+  firewall_rule_sets = fileset(local.firewall_rule_path, "*.json")
   firewall_rules = flatten([for rules in local.firewall_rule_sets : [
     for rule in jsondecode(file("${local.firewall_rule_path}/${rules}")) :
     merge(rule, { fileName = split(".", rules)[0] })
@@ -25,8 +25,8 @@ output "environment" {
   }
 }
 
-### Creates JSON file that contains a list of all configured rules
-resource "local_file" "rules_json" {
-  content  = jsonencode((values(module.firewall_rules)).*.firewall_rule)
-  filename = "${path.module}/outputs/managed.json"
-}
+# ### Creates JSON file that contains a list of all configured rules
+# resource "local_file" "rules_json" {
+#   content  = jsonencode((values(module.firewall_rules)).*.firewall_rule)
+#   filename = "${path.module}/outputs/managed.json"
+# }
