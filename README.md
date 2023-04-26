@@ -67,7 +67,7 @@ module "firewall_rules" {
 
 >*Note:* 
 >- `project_id`, `network`, `prefix` & `environment` can be overloaded within the firewall_rules object
->- `project_id`, `network` **MUST** be specified either as a var or within the `firewall_rules` object
+>- `project_id`, `network` **MUST** be specified either as a variable or within the `firewall_rules` object
 
 ### Firewall Rules Object Format
 >*Note:*  Any field flagged below for `UUID Generation` will be used to generate a unique firewall rule name if the name field is not explicitly specified. This helps to prevent naming collisions in GCP and terraform state
