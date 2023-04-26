@@ -14,19 +14,11 @@ module "firewall_rules" {
   project_id = var.project_id
   network    = var.network
 
-  for_each      = { for rule in local.firewall_rules : "${rule.fileName}--${rule.id}" => rule }
-  firewall_rule = each.value
-}
-
-output "environment" {
-  value = {
-    network    = var.network,
-    project_id = var.project_id,
-  }
+  firewall_rules = local.firewall_rules
 }
 
 # ### Creates JSON file that contains a list of all configured rules
 # resource "local_file" "rules_json" {
-#   content  = jsonencode((values(module.firewall_rules)).*.firewall_rule)
+#   content  = jsonencode(module.firewall_rules.firewall_rules_raw)
 #   filename = "${path.module}/outputs/managed.json"
 # }
