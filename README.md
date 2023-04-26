@@ -72,6 +72,7 @@ module "firewall_rules" {
 | project_id | This field denotes the explicit project_id of the firewall rule | `String` | &check; | N/A | no |
 | network | This field denotes the explicit vpc of the firewall rule | `String` | &check; | N/A | no |
 | environment | This field denotes the environment tag for firewall rule, used for dynamic name generation | `String` | &check; | N/A | no |
+| prefix | This field denotes the prefix tag for firewall rule, used for dynamic name generation | `String` | &check; | N/A | no |
 | id | This field denotes an identifier for this rule within the json file, used for dynamic name generation | `String` | &check; | N/A | no |
 | description | Description of what the rule is intended to do | `String` | | `null` | no |
 | action | The action for the firewall rule | `allow` or `deny` | | N/A | yes |
@@ -81,7 +82,7 @@ module "firewall_rules" {
 | disabled | Denotes whether the firewall rule is disabled, i.e not applied to the network it is associated with. | `Boolean` | | `false` | no |
 | sources | A list of instance tags, service accounts or subnet ranges indicating source resources that may initiate network connections | `list(String)` | | N/A | yes |
 | targets | A list of instance tags, service accounts or subnet ranges indicating target resources that may recieve network connections | `list(String)` | | N/A |  yes |
-| rules | A list of protocols and optional list of ports to which this rule applies. Each ports entry must be either an integer, range or an empty list `[]` to indicate all ports for the given protocol. | `list(Object{protocol=String, ports=list(Number), port_ranges=list(String)})`  | | N/A | yes |
+| rules | A list of protocols and optional list of ports to which this rule applies. Each ports entry must be either an integer, range or an empty list `[]` to indicate all ports for the given protocol. | `list(Object{protocol=String, ports=list(Number), ports=list(String)})`  | | N/A | yes |
 
 ## Bonus Example
 Using the local_file resource you can output the created rules to a JSON file and then use the provided PowerShell script to compare Firewall Rules managed by this Terraform Module and any existing rules in GCP to identify any unmanaged rules.

@@ -6,20 +6,28 @@ locals {
     prefix      = "UNKNOWN"
     priority    = 1000,
     disabled    = false,
-    direction   = "ingress",
+    direction   = "INGRESS",
     log_config  = "DISABLED",
   }
 
   _firewall_rules = [for firewall_rule in var.firewall_rules : {
-    name        = try(firewall_rule.name, local.defaults_firewall_rule.name)
+    name        = firewall_rule.name != null ? firewall_rule.name : local.defaults_firewall_rule.name
     description = try(firewall_rule.description, firewall_rule.id, null)
-    id          = try(firewall_rule.id, local.defaults_firewall_rule.id)
+    id          = firewall_rule.id != null ? firewall_rule.id : local.defaults_firewall_rule.id
 
-    project_id  = try(firewall_rule.project_id, var.project_id)
-    prefix      = try(firewall_rule.prefix, var.prefix != null ? var.prefix : local.defaults_firewall_rule.prefix)
-    environment = try(firewall_rule.environment, var.environment != null ? var.environment : local.defaults_firewall_rule.environment)
+    project_id = firewall_rule.project_id != null ? firewall_rule.project_id : var.project_id
+    network    = firewall_rule.network != null ? firewall_rule.network : var.network
 
-    network = try(firewall_rule.network, var.network)
+    prefix = (
+      firewall_rule.prefix != null ? firewall_rule.prefix :
+      var.prefix != null ? var.prefix : local.defaults_firewall_rule.prefix
+    )
+
+    environment = (
+      firewall_rule.environment != null ? firewall_rule.environment :
+      var.environment != null ? var.environment : local.defaults_firewall_rule.environment
+    )
+
 
     priority    = try(firewall_rule.priority, local.defaults_firewall_rule.priority)
     rule_action = lower(firewall_rule.action)
@@ -87,7 +95,7 @@ resource "google_compute_firewall" "firewall_rule" {
     iterator = rule
     content {
       protocol = lower(rule.value.protocol)
-      ports    = concat(try(rule.value.ports, []), try(rule.value.port_ranges, []))
+      ports    = rule.value.ports != null ? rule.value.ports : []
     }
   }
   dynamic "deny" {
@@ -95,7 +103,7 @@ resource "google_compute_firewall" "firewall_rule" {
     iterator = rule
     content {
       protocol = lower(rule.value.protocol)
-      ports    = concat(try(rule.value.ports, []), try(rule.value.port_ranges, []))
+      ports    = rule.value.ports != null ? rule.value.ports : []
     }
   }
 }
