@@ -1,5 +1,5 @@
 # Google Cloud VPC Firewall Rules
-This module that provides a simplified approach for creating/managing firewall rules in GCP. 
+This module that provides a simplified approach for creating/managing firewall rules in GCP leveraging JSON as the source of truth. 
 
 It supports mixed values in both the source and target JSON field and uses string matching to determine type, types and logic listed below....
 -  service_accounts = `if length(split("@", x)) > 1`
@@ -64,11 +64,13 @@ module "firewall_rules" {
 | prefix | This field denotes the prefix tag for firewall rule, used for dynamic name generation. | `string` | no |
 | environment | This field denotes the environment tag for firewall rule, used for dynamic name generation. | `string` | no |
 | firewall_rules | Firewall Rule object to be passed to the Firewall Rules Module | `object` | yes |
-*Note:* `project_id`, `network`, `prefix` & `environment` can be overloaded within the firewall_rules object
-*Note:* `project_id`, `network` **MUST** be specified either as a var or within the `firewall_rules` object
+
+>*Note:* 
+>- `project_id`, `network`, `prefix` & `environment` can be overloaded within the firewall_rules object
+>- `project_id`, `network` **MUST** be specified either as a var or within the `firewall_rules` object
 
 ### Firewall Rules Object Format
-*Note:* Any field flagged below for `UUID Generation` will be used to generate a unique firewall rule name if the name field is not explicitly specified. This helps to prevent naming collisions in GCP and terraform state
+>*Note:*  Any field flagged below for `UUID Generation` will be used to generate a unique firewall rule name if the name field is not explicitly specified. This helps to prevent naming collisions in GCP and terraform state
 
 | Name | Description | Type | UUID Generation | Default | Required |
 |------|-------------|------|---------|---------|:--------:|
@@ -91,7 +93,7 @@ module "firewall_rules" {
 ## Bonus Example
 Using the local_file resource you can output the created rules to a JSON file and then use the provided PowerShell script to compare Firewall Rules managed by this Terraform Module and any existing rules in GCP to identify any unmanaged rules.
 
-*Note:* This section expects an `ouputs` directory to exist as a valid target for JSON file output
+>*Note:* This section expects an `ouputs` directory to exist as a valid target for JSON file output
 
 ```hcl
 locals {
