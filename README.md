@@ -7,7 +7,7 @@ It supports mixed values in both the source and target JSON field and uses strin
 -  subnet_ranges    = `if can(cidrnetmask(x))`
 
 ## Example Json Firewall Rule
-Firewall Rules must be formated as valid JSON and added to a directory called `rules`. The `id` field must be unique within a given JSON file but does not need to be globaly unique.
+Firewall Rules must be formated as valid JSON and added to a directory called `rules`. The `id` field is used to help uniquely identify the firewall rule within a specified environment,prefix,project when potential collisions could occur.
 
 ```json
 [
