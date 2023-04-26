@@ -61,7 +61,11 @@ module "firewall_rules" {
 |------|-------------|------|:--------:|
 | project_id | Project id of the project that holds the network. | `string` | no |
 | network | Name of the network this set of firewall rules applies to. | `string` | no |
+| prefix | This field denotes the prefix tag for firewall rule, used for dynamic name generation. | `string` | no |
+| environment | This field denotes the environment tag for firewall rule, used for dynamic name generation. | `string` | no |
 | firewall_rules | Firewall Rule object to be passed to the Firewall Rules Module | `object` | yes |
+*Note:* `project_id`, `network`, `prefix` & `environment` can be overloaded within the firewall_rules object
+*Note:* `project_id`, `network` **MUST** be specified either as a var or within the `firewall_rules` object
 
 ### Firewall Rules Object Format
 *Note:* Any field flagged below for `UUID Generation` will be used to generate a unique firewall rule name if the name field is not explicitly specified. This helps to prevent naming collisions in GCP and terraform state
