@@ -17,7 +17,6 @@ variable "firewall_rules" {
     targets     = list(string),
     rules = list(object({
       protocol = string,
-      ports    = optional(list(number))
       ports    = optional(list(string))
     }))
   }))
@@ -41,6 +40,13 @@ variable "firewall_rules" {
       ], upper(value))
     ]) == length(var.firewall_rules)
     error_message = "firewall_rule log_config must be one of 'EXCLUDE_ALL_METADATA', 'INCLUDE_ALL_METADATA' or 'DISABLED'."
+  }
+
+  validation {
+    condition = alltrue([
+      for value in flatten(var.firewall_rules[*].rules.*.ports) : (can(regex("^\\d+$", value)) || can(regex("^\\d+-\\d+$", value)))
+    ])
+    error_message = "firewall_rule ports must contain a list of numbers or number ranges"
   }
 
   validation {
