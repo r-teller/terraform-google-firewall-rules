@@ -48,7 +48,7 @@ locals {
     rules      = try(firewall_rule.rules, null)
   }]
 
-  firewall_rules = { for firewall_rule in local._firewall_rules : format("fw-r-%s", uuidv5("x500",
+  firewall_rules_legacy = { for firewall_rule in local._firewall_rules : format("fw-r-%s", uuidv5("x500",
     format("PREFIX=%s,ENVIRONMENT=%s,PROJECT_ID=%s,NETWORK=%s,NAME=%s,ID=%s",
       firewall_rule.prefix,
       firewall_rule.environment,
@@ -60,12 +60,25 @@ locals {
     source_ranges = length(concat(firewall_rule.source_service_accounts, firewall_rule.source_tags, firewall_rule.source_cidrs)) > 0 ? firewall_rule.source_cidrs : ["0.0.0.0/0"]
     target_ranges = length(concat(firewall_rule.target_service_accounts, firewall_rule.target_tags, firewall_rule.target_cidrs)) > 0 ? firewall_rule.target_cidrs : ["0.0.0.0/0"]
     })
+  }
 
+  firewall_rules = { for firewall_rule in local._firewall_rules : format("fw-r-%s",
+    uuidv5("x500", join(",", [for k2, v2 in {
+      PREFIX      = var.override_dynamic_naming.include_prefix ? firewall_rule.prefix : null,
+      ENVIRONMENT = var.override_dynamic_naming.include_environment ? firewall_rule.environment : null,
+      PROJECT_ID  = var.override_dynamic_naming.include_project_id ? firewall_rule.project_id : null,
+      NETWORK     = var.override_dynamic_naming.include_network ? firewall_rule.network : null,
+      NAME        = var.override_dynamic_naming.include_name ? firewall_rule.name : null,
+      ID          = var.override_dynamic_naming.include_id ? firewall_rule.id : null,
+      } : format("%s=%s", k2, v2) if v2 != null]))) => merge(firewall_rule, {
+      source_ranges = length(concat(firewall_rule.source_service_accounts, firewall_rule.source_tags, firewall_rule.source_cidrs)) > 0 ? firewall_rule.source_cidrs : ["0.0.0.0/0"]
+      target_ranges = length(concat(firewall_rule.target_service_accounts, firewall_rule.target_tags, firewall_rule.target_cidrs)) > 0 ? firewall_rule.target_cidrs : ["0.0.0.0/0"]
+    })
   }
 }
 
 resource "google_compute_firewall" "firewall_rule" {
-  for_each = local.firewall_rules
+  for_each = var.use_legacy_naming ? local.firewall_rules_legacy : local.firewall_rules
   name     = each.value.name != local.defaults_firewall_rule.name ? each.value.name : each.key
   project  = each.value.project_id
   network  = each.value.network
@@ -74,14 +87,17 @@ resource "google_compute_firewall" "firewall_rule" {
   disabled  = each.value.disabled
   priority  = each.value.priority
 
-  description        = try(each.value.description, null)
-  source_ranges      = length(each.value.source_ranges) > 0 && each.value.rule_direction == "INGRESS" ? each.value.source_ranges : length(each.value.source_ranges) == 0 && each.value.rule_direction == "INGRESS" ? [] : null
-  destination_ranges = length(each.value.target_ranges) > 0 && each.value.rule_direction == "EGRESS" ? each.value.target_ranges : length(each.value.target_ranges) == 0 && each.value.rule_direction == "EGRESS" ? [] : null
+  description = try(each.value.description, null)
+
+  source_ranges      = length(each.value.source_cidrs) > 0 ? each.value.source_cidrs : null
+  destination_ranges = length(each.value.target_cidrs) > 0 ? each.value.target_cidrs : null
 
   source_tags             = length(each.value.source_tags) > 0 && each.value.rule_direction == "INGRESS" ? each.value.source_tags : null
   source_service_accounts = length(each.value.source_service_accounts) > 0 && each.value.rule_direction == "INGRESS" ? each.value.source_service_accounts : null
+
   target_tags             = length(each.value.target_tags) > 0 && each.value.rule_direction == "INGRESS" ? each.value.target_tags : length(each.value.source_tags) > 0 && each.value.rule_direction == "EGRESS" ? each.value.source_tags : null
   target_service_accounts = length(each.value.target_service_accounts) > 0 && each.value.rule_direction == "INGRESS" ? each.value.target_service_accounts : length(each.value.source_service_accounts) > 0 && each.value.rule_direction == "EGRESS" ? each.value.source_service_accounts : null
+
 
   dynamic "log_config" {
     for_each = each.value.log_config != "DISABLED" ? [1] : []
@@ -98,6 +114,7 @@ resource "google_compute_firewall" "firewall_rule" {
       ports    = rule.value.ports != null ? rule.value.ports : []
     }
   }
+
   dynamic "deny" {
     for_each = [for rule in each.value.rules : rule if each.value.rule_action == "deny"]
     iterator = rule

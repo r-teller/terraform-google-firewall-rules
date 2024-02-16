@@ -1,3 +1,7 @@
+output "firewall_rules" {
+  value = local.firewall_rules
+}
+
 output "firewall_rules_raw" {
   value = google_compute_firewall.firewall_rule.*
 }
