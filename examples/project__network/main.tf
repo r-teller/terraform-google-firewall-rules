@@ -9,14 +9,20 @@ locals {
 }
 
 module "firewall_rules" {
-  source     = "r-teller/firewall-rules/google"
-  version    = ">=3.0.0"
+  # source = "../.."
+  source  = "r-teller/firewall-rules/google"
+  version = ">=3.0.0"
+
   project_id = var.project_id
   network    = var.network
 
   firewall_rules = local.firewall_rules
+
+  ## Optional field used to include implicit sources within Firewall rules
+  # include_implicit_addresses = true
+
   ## Optional field for using legacy dynamic naming
-  # use_legacy_naming = false
+  # use_legacy_naming = true
 
   ## Optional field that can be used to limit attributes used in dynamic naming
   # override_dynamic_naming = {

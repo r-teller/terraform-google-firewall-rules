@@ -9,7 +9,29 @@
         "sources": [
             "35.235.240.0/20"
         ],
-        "targets": [ ],
+        "targets": [],
+        "rules": [
+            {
+                "protocol": "TCP",
+                "ports": []
+            }
+        ]
+    },
+    {
+        "id": "fffb-new",
+        "description": "This rule will allow IAP ranges access to all VMs on all ports.",
+        "action": "allow",
+        "direction": "ingress",
+        "log_config": "EXCLUDE_ALL_METADATA",
+        "priority": 65530,
+        "sources": [
+            "35.235.240.0/20"
+        ],
+        "targets": [
+            "192.168.0.0/16",
+            "172.16.0.0/12",
+            "10.0.0.0/8"
+        ],
         "rules": [
             {
                 "protocol": "TCP",

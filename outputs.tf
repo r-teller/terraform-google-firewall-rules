@@ -1,7 +1,3 @@
-output "firewall_rules" {
-  value = local.firewall_rules
-}
-
 output "firewall_rules_raw" {
   value = google_compute_firewall.firewall_rule.*
 }
@@ -17,8 +13,9 @@ output "firewall_rules_json" {
     priority  = local.firewall_rules[key].priority
 
     description        = try(local.firewall_rules[key].description, null)
-    source_ranges      = length(local.firewall_rules[key].source_ranges) > 0 && local.firewall_rules[key].rule_direction == "INGRESS" ? local.firewall_rules[key].source_ranges : length(local.firewall_rules[key].source_ranges) == 0 && local.firewall_rules[key].rule_direction == "INGRESS" ? [] : null
-    destination_ranges = length(local.firewall_rules[key].target_ranges) > 0 && local.firewall_rules[key].rule_direction == "EGRESS" ? local.firewall_rules[key].target_ranges : length(local.firewall_rules[key].target_ranges) == 0 && local.firewall_rules[key].rule_direction == "EGRESS" ? [] : null
+    
+    source_ranges      = length(local.firewall_rules[key].source_ranges) > 0 ? local.firewall_rules[key].source_ranges : null
+    destination_ranges = length(local.firewall_rules[key].target_ranges) > 0 ? local.firewall_rules[key].target_ranges : null
 
     source_tags             = length(local.firewall_rules[key].source_tags) > 0 && local.firewall_rules[key].rule_direction == "INGRESS" ? local.firewall_rules[key].source_tags : null
     source_service_accounts = length(local.firewall_rules[key].source_service_accounts) > 0 && local.firewall_rules[key].rule_direction == "INGRESS" ? local.firewall_rules[key].source_service_accounts : null

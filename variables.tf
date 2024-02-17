@@ -5,7 +5,7 @@ variable "firewall_rules" {
     id          = optional(string),
     description = optional(string, null),
     action      = string,
-    direction   = optional(string, "INGRESS")
+    direction   = optional(string, "INGRESS"),
     log_config  = optional(string, "DISABLED"),
     priority    = optional(number, 1000),
     disabled    = optional(bool, false),
@@ -46,7 +46,7 @@ variable "firewall_rules" {
     condition = alltrue([
       for value in flatten(var.firewall_rules[*].rules.*.ports) : (can(regex("^\\d+$", value)) || can(regex("^\\d+-\\d+$", value)))
     ])
-    error_message = "firewall_rule ports must contain a list of numbers or number ranges"
+    error_message = "firewall_rule ports must contain a list of numbers or number ranges."
   }
 
   validation {
@@ -56,28 +56,43 @@ variable "firewall_rules" {
         "deny"
       ], lower(value))
     ]) == length(var.firewall_rules)
-    error_message = "firewall_rule log_config must be one of 'allow' or 'deny'."
+    error_message = "firewall_rule action must be one of 'allow' or 'deny'."
   }
 }
 
 variable "project_id" {
-  type = string
+  type        = string
   description = "Project id of the project that holds the network."
   default     = null
 }
 
 variable "network" {
-  type = string
+  type        = string
   description = "Name of the network this set of firewall rules applies to."
   default     = null
 }
 variable "use_legacy_naming" {
-  default = false
-  type    = bool
+  description = "Toggle to use legacy naming conventions for firewall rules."
+  type        = bool
+  default     = false
+}
+
+variable "include_implicit_addresses" {
+  description = "When a source or destination specification is ommited from in an ingress or egress rule, Google Cloud uses the default source IPv4 address range 0.0.0.0/0 (any IPv4 address). This flag includes it as an explicit confiugration attribute"
+  type        = bool
+  default     = true
 }
 
 variable "override_dynamic_naming" {
-  default = {}
+  description = "Configuration object for dynamic naming of firewall rules, specifying which attributes to include. These flags do not work with legacy naming"
+  default = {
+    include_prefix      = true,
+    include_environment = true,
+    include_project_id  = true,
+    include_network     = true,
+    include_name        = true,
+    include_id          = true
+  }
   type = object({
     include_prefix      = optional(bool, true)
     include_environment = optional(bool, true)
@@ -89,11 +104,13 @@ variable "override_dynamic_naming" {
 }
 
 variable "prefix" {
-  type    = string
-  default = null
+  description = "This field denotes the prefix tag for firewall rule, used for dynamic name generation."
+  type        = string
+  default     = null
 }
 
 variable "environment" {
-  type    = string
-  default = null
+  description = "This field denotes the environment tag for firewall rule, used for dynamic name generation."
+  type        = string
+  default     = null
 }

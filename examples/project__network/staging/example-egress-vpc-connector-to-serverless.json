@@ -1,6 +1,6 @@
 [
     {
-        "id": "555555",
+        "id": "888888",
         "description": "This rule will allow all traffic from vpc-connecotr network tag to VPC Connector Subnets",
         "action": "allow",
         "direction": "egress",

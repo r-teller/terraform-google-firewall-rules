@@ -1,6 +1,6 @@
 [
     {
-        "id": "555555",
+        "id": "666666",
         "description": "This rule will allow all traffic from VPC Connector Subnets to vpc-connecotr network tag on TCP Port 667",
         "action": "allow",
         "direction": "INGRESS",

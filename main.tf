@@ -3,7 +3,7 @@ locals {
     name        = "UNKNOWN",
     id          = "UNKNOWN",
     environment = "UNKNOWN",
-    prefix      = "UNKNOWN"
+    prefix      = "UNKNOWN",
     priority    = 1000,
     disabled    = false,
     direction   = "INGRESS",
@@ -28,20 +28,19 @@ locals {
       var.environment != null ? var.environment : local.defaults_firewall_rule.environment
     )
 
-
     priority    = try(firewall_rule.priority, local.defaults_firewall_rule.priority)
     rule_action = lower(firewall_rule.action)
 
     rule_direction = upper(try(firewall_rule.direction, local.defaults_firewall_rule.direction))
     disabled       = try(firewall_rule.disabled, local.defaults_firewall_rule.disabled)
 
-    source_service_accounts = [for x in firewall_rule.sources : x if length(split("@", x)) > 1 && !can(cidrnetmask(x))]
-    source_tags             = [for x in firewall_rule.sources : x if length(split("@", x)) < 2 && !can(cidrnetmask(x))]
-    source_cidrs            = [for x in firewall_rule.sources : x if can(cidrnetmask(x))]
+    source_service_accounts = [for x in firewall_rule.sources : trimspace(x) if length(split("@", trimspace(x))) > 1 && !can(cidrnetmask(trimspace(x)))]
+    source_tags             = [for x in firewall_rule.sources : trimspace(x) if length(split("@", trimspace(x))) < 2 && !can(cidrnetmask(trimspace(x)))]
+    source_cidrs            = [for x in firewall_rule.sources : trimspace(x) if can(cidrnetmask(trimspace(x)))]
 
-    target_service_accounts = [for x in firewall_rule.targets : x if length(split("@", x)) > 1 && !can(cidrnetmask(x))]
-    target_tags             = [for x in firewall_rule.targets : x if length(split("@", x)) < 2 && !can(cidrnetmask(x))]
-    target_cidrs            = [for x in firewall_rule.targets : x if can(cidrnetmask(x))]
+    target_service_accounts = [for x in firewall_rule.targets : trimspace(x) if length(split("@", trimspace(x))) > 1 && !can(cidrnetmask(trimspace(x)))]
+    target_tags             = [for x in firewall_rule.targets : trimspace(x) if length(split("@", trimspace(x))) < 2 && !can(cidrnetmask(trimspace(x)))]
+    target_cidrs            = [for x in firewall_rule.targets : trimspace(x) if can(cidrnetmask(trimspace(x)))]
 
 
     log_config = try(upper(firewall_rule.log_config), local.defaults_firewall_rule.log_config)
@@ -57,8 +56,8 @@ locals {
       firewall_rule.name,
       firewall_rule.id,
     ))) => merge(firewall_rule, {
-    source_ranges = length(concat(firewall_rule.source_service_accounts, firewall_rule.source_tags, firewall_rule.source_cidrs)) > 0 ? firewall_rule.source_cidrs : ["0.0.0.0/0"]
-    target_ranges = length(concat(firewall_rule.target_service_accounts, firewall_rule.target_tags, firewall_rule.target_cidrs)) > 0 ? firewall_rule.target_cidrs : ["0.0.0.0/0"]
+    source_ranges = length(concat(firewall_rule.source_service_accounts, firewall_rule.source_tags, firewall_rule.source_cidrs)) > 0 ? firewall_rule.source_cidrs : var.include_implicit_addresses ? ["0.0.0.0/0"] : []
+    target_ranges = length(concat(firewall_rule.target_service_accounts, firewall_rule.target_tags, firewall_rule.target_cidrs)) > 0 ? firewall_rule.target_cidrs : var.include_implicit_addresses ? ["0.0.0.0/0"] : []
     })
   }
 
@@ -71,8 +70,8 @@ locals {
       NAME        = var.override_dynamic_naming.include_name ? firewall_rule.name : null,
       ID          = var.override_dynamic_naming.include_id ? firewall_rule.id : null,
       } : format("%s=%s", k2, v2) if v2 != null]))) => merge(firewall_rule, {
-      source_ranges = length(concat(firewall_rule.source_service_accounts, firewall_rule.source_tags, firewall_rule.source_cidrs)) > 0 ? firewall_rule.source_cidrs : ["0.0.0.0/0"]
-      target_ranges = length(concat(firewall_rule.target_service_accounts, firewall_rule.target_tags, firewall_rule.target_cidrs)) > 0 ? firewall_rule.target_cidrs : ["0.0.0.0/0"]
+      source_ranges = length(concat(firewall_rule.source_service_accounts, firewall_rule.source_tags, firewall_rule.source_cidrs)) > 0 ? firewall_rule.source_cidrs : var.include_implicit_addresses ? ["0.0.0.0/0"] : []
+      target_ranges = length(concat(firewall_rule.target_service_accounts, firewall_rule.target_tags, firewall_rule.target_cidrs)) > 0 ? firewall_rule.target_cidrs : var.include_implicit_addresses ? ["0.0.0.0/0"] : []
     })
   }
 }
@@ -89,8 +88,8 @@ resource "google_compute_firewall" "firewall_rule" {
 
   description = try(each.value.description, null)
 
-  source_ranges      = length(each.value.source_cidrs) > 0 ? each.value.source_cidrs : null
-  destination_ranges = length(each.value.target_cidrs) > 0 ? each.value.target_cidrs : null
+  source_ranges      = length(each.value.source_ranges) > 0 ? each.value.source_ranges : null
+  destination_ranges = length(each.value.target_ranges) > 0 ? each.value.target_ranges : null
 
   source_tags             = length(each.value.source_tags) > 0 && each.value.rule_direction == "INGRESS" ? each.value.source_tags : null
   source_service_accounts = length(each.value.source_service_accounts) > 0 && each.value.rule_direction == "INGRESS" ? each.value.source_service_accounts : null
