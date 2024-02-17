@@ -88,8 +88,8 @@ resource "google_compute_firewall" "firewall_rule" {
 
   description = try(each.value.description, null)
 
-  source_ranges      = length(each.value.source_ranges) > 0 ? each.value.source_ranges : null
-  destination_ranges = length(each.value.target_ranges) > 0 ? each.value.target_ranges : null
+  source_ranges      = each.value.source_ranges
+  destination_ranges = each.value.target_ranges
 
   source_tags             = length(each.value.source_tags) > 0 && each.value.rule_direction == "INGRESS" ? each.value.source_tags : null
   source_service_accounts = length(each.value.source_service_accounts) > 0 && each.value.rule_direction == "INGRESS" ? each.value.source_service_accounts : null

@@ -1,0 +1,84 @@
+{
+    "$id": "shared.schema.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Shared Properties",
+    "definitions": {
+        "shared": {
+            "properties": {
+                "ip_cidr_range": {
+                    "type": "string",
+                    "description": "IP space allocated to this subnetwork in CIDR format.",
+                    "examples": [
+                        "192.168.0.0/24"
+                    ],
+                    "pattern": "^(?:([0-9]|[1-9][0-9]{0,1}|1[0-9]{1,2}|2[0-4][0-9]|25[0-5])(\\.([0-9]|[1-9][0-9]{0,1}|1[0-9]{1,2}|2[0-4][0-9]|25[0-5])){3}\/(([0-9]|[1-2][0-9]|3[0-2])))$"
+                },
+                "ip_address": {
+                    "type": "string",
+                    "description": "IP Address.",
+                    "examples": [
+                        "192.168.0.0"
+                    ],
+                    "pattern": "^(?:([0-9]|[1-9][0-9]{0,1}|1[0-9]{1,2}|2[0-4][0-9]|25[0-5])(\\.([0-9]|[1-9][0-9]{0,1}|1[0-9]{1,2}|2[0-4][0-9]|25[0-5])){3})$"
+                },
+                "service_account": {
+                    "title": "Service Account",
+                    "type": "string",
+                    "pattern": "^\\S+@\\S+\\.\\S+$",
+                    "maxLength": 63,
+                    "examples": [
+                        "project-number-compute@developer.gserviceaccount.com",
+                        "project-id@appspot.gserviceaccount.com",
+                        "project-number@cloudservices.gserviceaccount.com"
+                    ]
+                },
+                "service_accounts": {
+                    "title": "Service Accounts",
+                    "description": "Collection of service accounts",
+                    "type": "array",
+                    "uniqueItems": true,
+                    "items": {
+                        "$ref": "shared.schema.json#/definitions/shared/properties/service_account"
+                    },
+                    "examples": [
+                        {
+                            "service_accounts": [
+                                "project-number-compute@developer.gserviceaccount.com",
+                                "project-id@appspot.gserviceaccount.com",
+                                "project-number@cloudservices.gserviceaccount.com"
+                            ]
+                        }
+                    ]
+                },
+                "tag": {
+                    "title": "Tag",
+                    "description": "Strings added to a tags field in a resource, such as Compute Engine virtual machine (VM) instances or instance templates. Tags enable you to make firewall rules and routes applicable to specific VM instances.",
+                    "type": "string",
+                    "pattern": "^([a-z]([a-z0-9-]*[a-z0-9])?)$",
+                    "maxLength": 63,
+                    "examples": [
+                        "alpha-tag",
+                        "bravo-tag",
+                        "charlie-tag"
+                    ]
+                },
+                "tags": {
+                    "title": "Tags",
+                    "description": "Collection of tags",
+                    "type": "array",
+                    "uniqueItems": true,
+                    "items": {
+                        "$ref": "shared.schema.json#/definitions/shared/properties/tag"
+                    },
+                    "examples": [
+                        [
+                            "alpha-tag",
+                            "bravo-tag",
+                            "charlie-tag"
+                        ]
+                    ]
+                }
+            }
+        }
+    }
+}

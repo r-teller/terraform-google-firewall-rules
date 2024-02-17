@@ -12,10 +12,10 @@ output "firewall_rules_json" {
     disabled  = local.firewall_rules[key].disabled
     priority  = local.firewall_rules[key].priority
 
-    description        = try(local.firewall_rules[key].description, null)
-    
-    source_ranges      = length(local.firewall_rules[key].source_ranges) > 0 ? local.firewall_rules[key].source_ranges : null
-    destination_ranges = length(local.firewall_rules[key].target_ranges) > 0 ? local.firewall_rules[key].target_ranges : null
+    description = try(local.firewall_rules[key].description, null)
+
+    source_ranges      = local.firewall_rules[key].source_ranges
+    destination_ranges = local.firewall_rules[key].target_ranges
 
     source_tags             = length(local.firewall_rules[key].source_tags) > 0 && local.firewall_rules[key].rule_direction == "INGRESS" ? local.firewall_rules[key].source_tags : null
     source_service_accounts = length(local.firewall_rules[key].source_service_accounts) > 0 && local.firewall_rules[key].rule_direction == "INGRESS" ? local.firewall_rules[key].source_service_accounts : null
