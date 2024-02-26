@@ -15,6 +15,8 @@ locals {
     description = try(firewall_rule.description, firewall_rule.id, null)
     id          = firewall_rule.id != null ? firewall_rule.id : local.defaults_firewall_rule.id
 
+    file_name = try(firewall_rule.file_name, null)
+
     project_id = firewall_rule.project_id != null ? firewall_rule.project_id : var.project_id
     network    = firewall_rule.network != null ? firewall_rule.network : var.network
 

@@ -2,6 +2,18 @@ output "firewall_rules_raw" {
   value = google_compute_firewall.firewall_rule.*
 }
 
+
+output "firewall_rules_map" {
+  value = { for key, value in local.firewall_rules : key => {
+    file_name   = value.file_name
+    id          = value.id
+    environment = value.environment
+    prefix      = value.prefix
+    project_id  = value.project_id
+    network     = value.network
+  } }
+}
+
 output "firewall_rules_json" {
   value = [for key in keys(local.firewall_rules) : {
     name    = local.firewall_rules[key].name != local.defaults_firewall_rule.name ? local.firewall_rules[key].name : key

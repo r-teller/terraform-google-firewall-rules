@@ -3,6 +3,7 @@ variable "firewall_rules" {
   type = list(object({
     name        = optional(string),
     id          = optional(string),
+    file_name   = optional(string, null),
     description = optional(string, null),
     action      = string,
     direction   = optional(string, "INGRESS"),
