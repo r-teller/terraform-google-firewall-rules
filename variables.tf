@@ -4,6 +4,7 @@ variable "firewall_rules" {
     name        = optional(string),
     id          = optional(string),
     file_name   = optional(string, null),
+    rule_index   = optional(string, null),
     description = optional(string, null),
     action      = string,
     direction   = optional(string, "INGRESS"),

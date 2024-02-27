@@ -115,6 +115,7 @@ Additionally, the option to use legacy naming conventions has been added. This c
 >*Note:* 
 >- `project_id`, `network`, `prefix` & `environment` can be overloaded within the firewall_rules object
 >- `project_id`, `network` **MUST** be specified either as a variable or within the `firewall_rules` object
+>- The `override_dynamic_naming` object allows for granular control over the dynamic naming process (done through UUID generation below), enabling users to include or exclude specific attributes from the firewall rule's name.
 
 ### Firewall Rules Object Format
 >*Note:*  Any field flagged below for `UUID Generation` will be used to generate a unique firewall rule name if the name field is not explicitly specified. This helps to prevent naming collisions in GCP and terraform state
@@ -146,9 +147,12 @@ Using the local_file resource you can output the created rules to a JSON file an
 locals {
   firewall_rule_path = "./rules"
   firewall_rule_sets = fileset(local.firewall_rule_path, "*.json")
-  firewall_rules = flatten([for rules in local.firewall_rule_sets : [
-    for rule in jsondecode(file("${local.firewall_rule_path}/${rules}")) :
-    merge(rule, { fileName = split(".", rules)[0] })
+  firewall_rules = flatten([for rules_file in local.firewall_rule_sets : [
+    for rule_index, rule in jsondecode(file("${local.firewall_rule_path}/${rules_file}")) :
+    merge(rule, {
+       file_name =  rules_file
+       rule_index = rule_index
+      })
     ]
   ])
 }
@@ -162,9 +166,15 @@ module "firewall_rules" {
   firewall_rules = local.firewall_rules
 }
 
-# ### Creates JSON file that contains a list of all configured rules
-resource "local_file" "rules_json" {
+# ### Creates JSON file that contains a list of all configuration attributes that will be used to create firewall rules 
+resource "local_file" "firewall_rules_json" {
   content  = jsonencode(module.firewall_rules.firewall_rules_raw)
+  filename = "${path.module}/outputs/managed.json"
+}
+
+### Creates JSON file that contains elements of the pre-processing ruleset used to troubleshoot rules with dynamically generated names
+resource "local_file" "firewall_rules_map" {
+  content  = jsonencode(module.firewall_rules.firewall_rules_map)
   filename = "${path.module}/outputs/managed.json"
 }
 ```

@@ -11,30 +11,42 @@ locals {
   }
 
   _firewall_rules = [for firewall_rule in var.firewall_rules : {
-    name        = firewall_rule.name != null ? firewall_rule.name : local.defaults_firewall_rule.name
+    # name        = firewall_rule.name != null ? firewall_rule.name : local.defaults_firewall_rule.name
+    name = coalesce(firewall_rule.name, local.defaults_firewall_rule.name)
+
     description = try(firewall_rule.description, firewall_rule.id, null)
-    id          = firewall_rule.id != null ? firewall_rule.id : local.defaults_firewall_rule.id
 
-    file_name = try(firewall_rule.file_name, null)
+    # id          = firewall_rule.id != null ? firewall_rule.id : local.defaults_firewall_rule.id
+    id = coalesce(firewall_rule.id, local.defaults_firewall_rule.id)
 
-    project_id = firewall_rule.project_id != null ? firewall_rule.project_id : var.project_id
-    network    = firewall_rule.network != null ? firewall_rule.network : var.network
+    ## These are intended to be passed in to from the remote module to simplify tracking back to orginating JSON
+    file_name  = firewall_rule.file_name
+    rule_index = firewall_rule.rule_index
 
-    prefix = (
-      firewall_rule.prefix != null ? firewall_rule.prefix :
-      var.prefix != null ? var.prefix : local.defaults_firewall_rule.prefix
-    )
+    # project_id = firewall_rule.project_id != null ? firewall_rule.project_id : var.project_id
+    project_id = coalesce(firewall_rule.project_id, var.project_id)
 
-    environment = (
-      firewall_rule.environment != null ? firewall_rule.environment :
-      var.environment != null ? var.environment : local.defaults_firewall_rule.environment
-    )
+    # network    = firewall_rule.network != null ? firewall_rule.network : var.network
+    network = coalesce(firewall_rule.network, var.network)
 
-    priority    = try(firewall_rule.priority, local.defaults_firewall_rule.priority)
+    # prefix = (
+    #   firewall_rule.prefix != null ? firewall_rule.prefix :
+    #   var.prefix != null ? var.prefix : local.defaults_firewall_rule.prefix
+    # )
+    prefix = coalesce(firewall_rule.prefix, var.prefix, local.defaults_firewall_rule.prefix)
+
+    # environment = (
+    #   firewall_rule.environment != null ? firewall_rule.environment :
+    #   var.environment != null ? var.environment : local.defaults_firewall_rule.environment
+    # )
+    environment = coalesce(firewall_rule.environment, var.environment, local.defaults_firewall_rule.environment)
+
+    # priority    = try(firewall_rule.priority, local.defaults_firewall_rule.priority)
+    priority    = coalesce(firewall_rule.priority, local.defaults_firewall_rule.priority)
     rule_action = lower(firewall_rule.action)
 
-    rule_direction = upper(try(firewall_rule.direction, local.defaults_firewall_rule.direction))
-    disabled       = try(firewall_rule.disabled, local.defaults_firewall_rule.disabled)
+    rule_direction = upper(coalesce(firewall_rule.direction, local.defaults_firewall_rule.direction))
+    disabled       = coalesce(firewall_rule.disabled, local.defaults_firewall_rule.disabled)
 
     source_service_accounts = [for x in firewall_rule.sources : trimspace(x) if length(split("@", trimspace(x))) > 1 && !can(cidrnetmask(trimspace(x)))]
     source_tags             = [for x in firewall_rule.sources : trimspace(x) if length(split("@", trimspace(x))) < 2 && !can(cidrnetmask(trimspace(x)))]
@@ -45,25 +57,28 @@ locals {
     target_cidrs            = [for x in firewall_rule.targets : trimspace(x) if can(cidrnetmask(trimspace(x)))]
 
 
-    log_config = try(upper(firewall_rule.log_config), local.defaults_firewall_rule.log_config)
+    log_config = coalesce(upper(firewall_rule.log_config), local.defaults_firewall_rule.log_config)
     rules      = try(firewall_rule.rules, null)
   }]
 
-  firewall_rules_legacy = { for firewall_rule in local._firewall_rules : format("fw-r-%s", uuidv5("x500",
-    format("PREFIX=%s,ENVIRONMENT=%s,PROJECT_ID=%s,NETWORK=%s,NAME=%s,ID=%s",
-      firewall_rule.prefix,
-      firewall_rule.environment,
-      firewall_rule.project_id,
-      firewall_rule.network,
-      firewall_rule.name,
-      firewall_rule.id,
-    ))) => merge(firewall_rule, {
-    source_ranges = length(concat(firewall_rule.source_service_accounts, firewall_rule.source_tags, firewall_rule.source_cidrs)) > 0 ? firewall_rule.source_cidrs : var.include_implicit_addresses ? ["0.0.0.0/0"] : []
-    target_ranges = length(concat(firewall_rule.target_service_accounts, firewall_rule.target_tags, firewall_rule.target_cidrs)) > 0 ? firewall_rule.target_cidrs : var.include_implicit_addresses ? ["0.0.0.0/0"] : []
+  firewall_rules_legacy = { for firewall_rule in local._firewall_rules : format("fw-r-%s",
+    uuidv5("x500",
+      format("PREFIX=%s,ENVIRONMENT=%s,PROJECT_ID=%s,NETWORK=%s,NAME=%s,ID=%s",
+        firewall_rule.prefix,
+        firewall_rule.environment,
+        firewall_rule.project_id,
+        firewall_rule.network,
+        firewall_rule.name,
+        firewall_rule.id,
+      ))) => merge(firewall_rule, {
+      source_ranges = length(concat(firewall_rule.source_service_accounts, firewall_rule.source_tags, firewall_rule.source_cidrs)) > 0 ? firewall_rule.source_cidrs : var.include_implicit_addresses ? ["0.0.0.0/0"] : []
+      target_ranges = length(concat(firewall_rule.target_service_accounts, firewall_rule.target_tags, firewall_rule.target_cidrs)) > 0 ? firewall_rule.target_cidrs : var.include_implicit_addresses ? ["0.0.0.0/0"] : []
     })
   }
 
-  firewall_rules = { for firewall_rule in local._firewall_rules : format("fw-r-%s",
+  firewall_rules = { for firewall_rule in local._firewall_rules : format("%s-%s%s",
+    firewall_rule.prefix != "UNKNOWN" ? firewall_rule.prefix : "fw-r",
+    firewall_rule.environment != "UNKNOWN" ? format("%s-", firewall_rule.environment) : "",
     uuidv5("x500", join(",", [for k2, v2 in {
       PREFIX      = var.override_dynamic_naming.include_prefix ? firewall_rule.prefix : null,
       ENVIRONMENT = var.override_dynamic_naming.include_environment ? firewall_rule.environment : null,

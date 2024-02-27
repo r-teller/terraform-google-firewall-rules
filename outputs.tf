@@ -5,12 +5,13 @@ output "firewall_rules_raw" {
 
 output "firewall_rules_map" {
   value = { for key, value in local.firewall_rules : key => {
-    file_name   = value.file_name
-    id          = value.id
-    environment = value.environment
-    prefix      = value.prefix
-    project_id  = value.project_id
-    network     = value.network
+    file_name   = value.file_name,
+    rule_index  = value.rule_index,
+    id          = value.id,
+    environment = value.environment,
+    prefix      = value.prefix,
+    project_id  = value.project_id,
+    network     = value.network,
   } }
 }
 
