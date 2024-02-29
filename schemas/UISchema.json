@@ -1,0 +1,29 @@
+{
+    "items": {
+        "rules": {
+            "items": {
+                "ports": {
+                    "items": {
+                        "ui:field": "StringField",
+                        "ui:fieldReplacesAnyOrOneOf": true
+                    }
+                }
+            }
+        },
+        "sources": {
+            "items": {
+                "ui:field": "StringField",
+                "ui:fieldReplacesAnyOrOneOf": true
+            }
+        },
+        "targets": {
+            "items": {
+                "ui:field": "StringField",
+                "ui:fieldReplacesAnyOrOneOf": true
+            }
+        },
+        "priority": {
+            "ui:emptyValue": 1000
+        }
+    }
+}
