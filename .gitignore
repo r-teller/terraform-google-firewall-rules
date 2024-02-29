@@ -1,6 +1,7 @@
 # Local staging directories
 **/.staging/
 **/.staging/*
+**/build_docs/node_modules/*
 
 # .terraform directory
 **/.terraform/*
