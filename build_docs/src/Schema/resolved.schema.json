@@ -117,7 +117,7 @@
         "widget": "GenericList",
         "items": {
           "type": "string",
-          "anyOf": [
+          "oneOf": [
             {
               "title": "IP CIDR Range",
               "type": "string",

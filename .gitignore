@@ -2,6 +2,7 @@
 **/.staging/
 **/.staging/*
 **/build_docs/node_modules/*
+**/build_docs_v2/node_modules/*
 
 # .terraform directory
 **/.terraform/*

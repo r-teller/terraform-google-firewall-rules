@@ -1,0 +1,36 @@
+{
+    "ui:options": {
+        "copyable": true
+    },
+    "ui:title": "Red Panda",
+    "items": {
+        "direction": {},
+        "rules": {
+            "items": {
+                "ports": {
+                    "items": {
+                        "ui:field": "StringField",
+                        "ui:fieldReplacesAnyOrOneOf": true
+                    }
+                }
+            }
+        },
+        "sources": {
+            "ui:emptyValue": [],
+            "items": {
+                "ui:field": "StringField",
+                "ui:fieldReplacesAnyOrOneOf": true
+            }
+        },
+        "targets": {
+            "ui:emptyValue": [],
+            "items": {
+                "ui:field": "StringField",
+                "ui:fieldReplacesAnyOrOneOf": true
+            }
+        },
+        "priority": {
+            "ui:emptyValue": 1000
+        }
+    }
+}
