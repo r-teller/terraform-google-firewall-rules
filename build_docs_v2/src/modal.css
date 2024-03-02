@@ -18,6 +18,79 @@
 
 .modal-body {
     /* Adjust the value based on your header and footer size */
-    max-height: calc(100vh - 212px); 
+    max-height: calc(100vh - 212px);
     overflow-y: auto;
+}
+
+.flex-parent fieldset {
+    display: flex;
+    flex-wrap: wrap;
+    border: none;
+    /* Override default fieldset border */
+    padding: 0;
+    /* Override default fieldset padding */
+    margin: 0;
+    /* You might want to reset the margin as well */
+}
+
+.flex-full {
+    /* margin: 10px; Adjust spacing */
+    flex-basis: 100%;
+}
+
+.flex-tenth {
+    /* margin: 10px; Adjust spacing */
+     align-items: center;
+     justify-content: bottom;
+     /* Centers the checkbox vertically */
+    /* flex-basis: 10%; */
+    display: flex;
+}
+
+.flex-fourtyfifth {
+    flex-basis: 45%;
+}
+
+.flex-fifth {
+    /* margin: 10px; Adjust spacing */
+    flex-basis: 5%;
+}
+
+.flex-quarter {
+    /* margin: 10px; Adjust spacing */
+    flex-basis: 25%;
+}
+
+.flex-half {
+    /* margin: 10px; Adjust spacing */
+    flex-basis: 50%;
+}
+
+.flex-third {
+    /* margin: 10px; Adjust spacing */
+    flex-basis: 33%;
+}
+
+.editable-pre {
+
+    font-family: monospace;
+    width: 100%;
+    height: auto;
+    min-height: 100px;
+    /* Adjust based on your needs */
+    max-height: calc(100vh - 212px);
+    overflow-y: auto;
+    background-color: #f5f5f5;
+    /* Light grey background, similar to <pre> */
+    border: 1px solid #ccc;
+    /* Light grey border */
+    box-sizing: border-box;
+    /* Include padding and border in the element's total width and height */
+    padding: 10px;
+    /* Add some padding */
+    white-space: pre-wrap;
+    /* Maintain whitespace formatting */
+    word-wrap: break-word;
+    /* Ensure long words do not break the layout */
+
 }

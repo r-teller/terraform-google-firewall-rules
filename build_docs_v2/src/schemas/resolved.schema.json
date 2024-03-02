@@ -25,11 +25,7 @@
             "title": "Egress"
           }
         ],
-        "default": "INGRESS",
-        "examples": [
-          "INGRESS",
-          "EGRESS"
-        ]
+        "default": "INGRESS"
       },
       "action": {
         "title": "Rule Action",
