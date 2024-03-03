@@ -20,5 +20,5 @@ npm install #// run externally for now :(
 npm run build #// run externally for now :(
 rm -rf ../docs/*
 mv ./build/* ../docs
-echo "docs.ihaz.cloud" > ./build/CNAME
+echo "docs.ihaz.cloud" > ../docs/CNAME
 rm -r ./build

@@ -2,6 +2,7 @@
   "name": "firewall-rules-json-generator",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://r-teller.github.io/terraform-google-firewall-rules/",
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.5.1",
     "@fortawesome/free-solid-svg-icons": "^6.5.1",
