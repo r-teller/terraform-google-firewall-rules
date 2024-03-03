@@ -1,6 +1,6 @@
 {
     "$id": "firewall_rules.schema.json",
-    "title": "Firewall Rules v3",
+    "title": "Collection of Firewall Rules",
     "type": "array",
     "uniqueItems": true,
     "widget": "GenericList",
@@ -25,6 +25,9 @@
             },
             "network": {
                 "$ref": "#/definitions/shared/properties/network"
+            },
+            "project_id": {
+                "$ref": "#/definitions/shared/properties/project_id"
             },
             "environment": {
                 "$ref": "#/definitions/shared/properties/environment"
@@ -160,7 +163,10 @@
                 "network": {
                     "title": "Network (VPC)",
                     "type": "string",
-                    "description": "The network to apply the rule to.",
+                    "description": "The network to which this rule is attached. If omitted, then network will be inherited.",
+                    "pattern": "^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$",
+                    "minLength": 5,
+                    "maxLength": 63,
                     "examples": [
                         "default-vpc"
                     ]
@@ -193,6 +199,17 @@
                     "maxLength": 63,
                     "examples": [
                         "<prefix>-<environment>-<network>-firewall-<id>"
+                    ]
+                },
+                "project_id": {
+                    "title": "Project ID",
+                    "type": "string",
+                    "description": "The Google Cloud project ID to use for this firewall rule. If omitted, then project_id will be inherited.",
+                    "pattern": "^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$",
+                    "minLength": 5,
+                    "maxLength": 63,
+                    "examples": [
+                        "my-example-project"
                     ]
                 },
                 "prefix": {
@@ -261,7 +278,7 @@
                     ]
                 },
                 "rule": {
-                    "title": "Firewall Rule",
+                    "title": "Rule",
                     "type": "object",
                     "properties": {
                         "protocol": {
@@ -307,8 +324,8 @@
                     ]
                 },
                 "rules": {
-                    "title": "Rules List",
-                    "description": "A list of individual rules that define the behavior of the firewall rule based on specified conditions.",
+                    "title": "Protocol and Port list",
+                    "description": "A list of individual rules that define the behavior of the firewall rule based on specified conditions of protocol and port combinations.",
                     "type": "array",
                     "widget": "SimpleList",
                     "uniqueItems": true,
@@ -359,7 +376,8 @@
                             "$ref": "#/definitions/shared/properties/protocol"
                         },
                         "ports": {
-                            "title": "Ports",
+                            "title": "Ports or Port-Ranges",
+                            "description": "A list of ports or port-ranges to which the firewall rule will apply. If no port or port range is specified, all ranges are applied.",
                             "type": "array",
                             "widget": "GenericList",
                             "items": {

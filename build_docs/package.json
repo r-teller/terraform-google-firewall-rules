@@ -1,52 +1,49 @@
 {
-    "name": "gcp-cloud-firewall-rules",
-    "version": "0.1.0",
-    "private": false,
-    "homepage": "https://r-teller.github.io/terraform-google-cloud-vpn/",
-    "dependencies": {
-        "@emotion/react": "^11.9.0",
-        "@emotion/styled": "^11.8.1",
-        "@mui/icons-material": "^5.1",
-        "@mui/material": "^5.1",
-        "@mui/system": "^5.1",
-        "@testing-library/jest-dom": "^4.2.4",
-        "@testing-library/react": "^9.5.0",
-        "@testing-library/user-event": "^7.2.1",
-        "@types/react": "^17.0",
-        "@types/react-dom": "^17.0",
-        "@ui-schema/dictionary": "0.0.11",
-        "@ui-schema/ds-material": "~0.4.1",
-        "@ui-schema/ui-schema": "~0.4.4",
-        "immutable": "^4.0.0",
-        "react": "^17.0",
-        "react-dom": "^17.0",
-        "react-loadable": "^5.5.0",
-        "react-router-dom": "^6.3.0",
-        "react-scripts": "^5.0.1",
-        "scheduler": "^0.18.0"
-    },
-    "scripts": {
-        "start": "react-scripts start",
-        "build": "react-scripts build",
-        "test": "react-scripts test",
-        "eject": "react-scripts eject",
-        "predeploy": "npm run build"
-    },
-    "eslintConfig": {
-        "extends": [
-            "react-app"
-        ]
-    },
-    "browserslist": {
-        "production": [
-            ">0.2%",
-            "not dead",
-            "not op_mini all"
-        ],
-        "development": [
-            "last 1 chrome version",
-            "last 1 firefox version",
-            "last 1 safari version"
-        ]
-    }
+  "name": "firewall-rules-json-generator",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^6.5.1",
+    "@fortawesome/free-solid-svg-icons": "^6.5.1",
+    "@fortawesome/react-fontawesome": "^0.2.0",
+    "@rjsf/core": "^5.17.1",
+    "@rjsf/utils": "^5.17.1",
+    "@rjsf/validator-ajv8": "^5.17.1",
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^13.4.0",
+    "ajv": "^8.12.0",
+    "ajv-errors": "^3.0.0",
+    "bootstrap": "^3.4.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-scripts": "5.0.1",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "eslint-config-react-app": "^7.0.1"
+  }
 }

@@ -1,0 +1,119 @@
+.firewall-rules-parent .firewall-rule-disabled-checkbox {
+    display: inline-block;
+    vertical-align: top;
+    margin-right: 4px;
+    transform: scale(2);
+    width: 30px;
+    padding-top: 11px;
+}
+
+
+.form-group.field.field-string .control-label,
+.form-group.field.field-string .MuiButtonBase-root,
+.form-group.field.field-integer .control-label,
+.form-group.field.field-integer .MuiButtonBase-root {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 8px;
+}
+
+.form-group.field.field-string .MuiButtonBase-root,
+.form-group.field.field-integer .MuiButtonBase-root {
+    margin: 0;
+    padding: 0;
+}
+
+
+.firewall-rules-parent .one-third-width-input {
+    display: inline-block;
+    vertical-align: top;
+    width: calc(33.5% - 6px);
+    margin-right: 4px;
+    box-sizing: border-box;
+}
+
+.firewall-rules-parent .one-fourth-width-input {
+    display: inline-block;
+    vertical-align: top;
+    width: calc(20% - 6px);
+    margin-right: 4px;
+    box-sizing: border-box;
+}
+
+
+.firewall-rules-parent .three-fourth-width-input {
+    display: inline-block;
+    vertical-align: top;
+    width: calc(76% - 6px);
+    margin-right: 4px;
+    box-sizing: border-box;
+}
+
+.firewall-rules-parent .rules-list-input {
+    width: 100%;
+}
+
+.firewall-rules-parent .half-width-input {
+    display: inline-block;
+    vertical-align: top;
+    width: calc(50% - 8px);
+    margin-right: 4px;
+    box-sizing: border-box;
+}
+
+.firewall-rules-parent .two-thirds-width-input {
+    display: inline-block;
+    vertical-align: top;
+    width: calc(66% - 8px);
+    margin-right: 4px;
+    box-sizing: border-box;
+}
+
+.firewall-rules-parent .form-group {
+    margin-bottom: 10px;
+    overflow: hidden;
+}
+
+.firewall-rules-parent fieldset {
+    border: none;
+    padding: 0;
+}
+
+.firewall-rules-parent label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.firewall-rules-parent input,
+.firewall-rules-parent select {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Target the legend directly and change its display property */
+.field.field-array.field-array-of-object legend {
+
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-size: 14px;
+    line-height: 1.42857143;
+    color: #333;
+    background-color: #fff;
+    font-weight: 700;
+    /* font-size: 14px;
+    color: #333;
+    font-weight: bold; */
+}
+
+/* Target the legend directly and change its display property */
+.field.field-array.field-array-of-string legend {
+
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-size: 14px;
+    line-height: 1.42857143;
+    color: #333;
+    background-color: #fff;
+    font-weight: 700;
+    /* font-size: 14px;
+    color: #333;
+    font-weight: bold; */
+}

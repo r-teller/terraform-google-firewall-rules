@@ -1,6 +1,6 @@
 {
-  "short_name": "UI-Schema Ex.",
-  "name": "UI-Schema Example CRA",
+  "short_name": "Firewall Rules",
+  "name": "Firewall Rules - JSON Form",
   "icons": [
     {
       "src": "favicon.ico",

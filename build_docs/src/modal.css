@@ -33,43 +33,15 @@
     /* You might want to reset the margin as well */
 }
 
-.flex-full {
-    /* margin: 10px; Adjust spacing */
-    flex-basis: 100%;
+.acheckbox input[type="checkbox"] {
+    /* Scale the checkbox */
+    /* Adjust the scaling factor as needed */
+    transform: scale(2);
+    /* Optional: Adjust the margin to ensure the checkbox doesn't overlap other elements */
+    margin: 15px;
+    padding-top: 30px;
 }
 
-.flex-tenth {
-    /* margin: 10px; Adjust spacing */
-     align-items: center;
-     justify-content: bottom;
-     /* Centers the checkbox vertically */
-    /* flex-basis: 10%; */
-    display: flex;
-}
-
-.flex-fourtyfifth {
-    flex-basis: 45%;
-}
-
-.flex-fifth {
-    /* margin: 10px; Adjust spacing */
-    flex-basis: 5%;
-}
-
-.flex-quarter {
-    /* margin: 10px; Adjust spacing */
-    flex-basis: 25%;
-}
-
-.flex-half {
-    /* margin: 10px; Adjust spacing */
-    flex-basis: 50%;
-}
-
-.flex-third {
-    /* margin: 10px; Adjust spacing */
-    flex-basis: 33%;
-}
 
 .editable-pre {
 
