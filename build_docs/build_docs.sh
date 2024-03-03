@@ -13,12 +13,12 @@ popd
 
 rm -rf ./public/documentation/*
 # pip install json-schema-for-humans
-generate-schema-doc --config expand_buttons=true ./src/schemas/resolved.schema.json ./public/documentation/index.html
+generate-schema-doc --config expand_buttons=true ./src/schemas/JSONSchema.json ./public/documentation/index.html
 
 # apt-get install npm
 npm install #// run externally for now :(
 npm run build #// run externally for now :(
 rm -rf ../docs/*
 mv ./build/* ../docs
-echo "docs.ihaz.cloud" > ../docs/CNAME
+# echo "docs.ihaz.cloud" > ../docs/CNAME
 rm -r ./build

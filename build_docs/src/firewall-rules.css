@@ -53,6 +53,14 @@
     width: 100%;
 }
 
+.firewall-rules-parent .full-width-input {
+    display: inline-block;
+    vertical-align: top;
+    width: calc(100% - 8px);
+    margin-right: 4px;
+    box-sizing: border-box;
+}
+
 .firewall-rules-parent .half-width-input {
     display: inline-block;
     vertical-align: top;
@@ -74,6 +82,32 @@
     overflow: hidden;
 }
 
+
+
+/* Target the legend directly and change its display property */
+.field.field-array.field-array-of-object legend {
+
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.42857143;
+    color: #333;
+    background-color: #fff;
+    font-weight: 700;
+    /* font-size: 14px;
+    color: #333;
+    font-weight: bold; */
+}
+
+/* Target the legend directly and change its display property */
+.field.field-array.field-array-of-string legend {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.42857143;
+    color: #333;
+    background-color: #fff;
+    font-weight: 700;
+}
+
 .firewall-rules-parent fieldset {
     border: none;
     padding: 0;
@@ -90,30 +124,10 @@
     box-sizing: border-box;
 }
 
-/* Target the legend directly and change its display property */
-.field.field-array.field-array-of-object legend {
-
-    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
-    font-size: 14px;
-    line-height: 1.42857143;
+.form-group.field.field-object.firewall-rules-parent>fieldset>legend {
+    font-size: 18px;
     color: #333;
-    background-color: #fff;
-    font-weight: 700;
-    /* font-size: 14px;
-    color: #333;
-    font-weight: bold; */
+    font-weight: bold;
+    border-bottom: 1.5px solid;
 }
 
-/* Target the legend directly and change its display property */
-.field.field-array.field-array-of-string legend {
-
-    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
-    font-size: 14px;
-    line-height: 1.42857143;
-    color: #333;
-    background-color: #fff;
-    font-weight: 700;
-    /* font-size: 14px;
-    color: #333;
-    font-weight: bold; */
-}

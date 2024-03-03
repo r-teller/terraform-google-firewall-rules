@@ -8,31 +8,29 @@
     "type": "object",
     "title": "Firewall Rule",
     "properties": {
-      "direction": {
-        "title": "Rule Direction",
-        "description": "The direction of traffic to which this rule applies. Can be ingress (incoming traffic) or egress (outgoing traffic).",
-        "type": "string",
-        "widget": "Select",
-        "oneOf": [
-          {
-            "const": "INGRESS",
-            "description": "Incoming traffic direction.",
-            "title": "Ingress"
-          },
-          {
-            "const": "EGRESS",
-            "description": "Outgoing traffic direction.",
-            "title": "Egress"
-          }
-        ],
-        "default": "INGRESS",
+      "disabled": {
+        "title": "Disable Firewall Rule",
+        "type": "boolean",
+        "description": "Indicates if the rule is disabled.",
+        "default": false,
         "examples": [
-          "INGRESS",
-          "EGRESS"
+          true,
+          false
+        ]
+      },
+      "name": {
+        "title": "Name",
+        "type": "string",
+        "description": "The name of the firewall rule. If not specified, it will be based on the id field.",
+        "pattern": "^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$",
+        "minLength": 1,
+        "maxLength": 63,
+        "examples": [
+          "<prefix>-<environment>-<network>-firewall-<id>"
         ]
       },
       "action": {
-        "title": "Rule Action",
+        "title": "Action",
         "description": "Defines whether the rule allows or denies traffic.",
         "type": "string",
         "widget": "Select",
@@ -54,45 +52,35 @@
           "DENY"
         ]
       },
+      "direction": {
+        "title": "Direction",
+        "description": "The direction of traffic to which this rule applies. Can be ingress (incoming traffic) or egress (outgoing traffic).",
+        "type": "string",
+        "widget": "Select",
+        "oneOf": [
+          {
+            "const": "INGRESS",
+            "description": "Incoming traffic direction.",
+            "title": "Ingress"
+          },
+          {
+            "const": "EGRESS",
+            "description": "Outgoing traffic direction.",
+            "title": "Egress"
+          }
+        ],
+        "default": "INGRESS",
+        "examples": [
+          "INGRESS",
+          "EGRESS"
+        ]
+      },
       "description": {
         "title": "Description",
         "type": "string",
         "description": "A detailed description of the rule.",
         "examples": [
           "This rule allows traffic from specific IP ranges."
-        ]
-      },
-      "name": {
-        "title": "Firewall Rule Name",
-        "type": "string",
-        "description": "The name of the firewall rule. If not specified, it will be based on the id field.",
-        "pattern": "^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$",
-        "minLength": 1,
-        "maxLength": 63,
-        "examples": [
-          "<prefix>-<environment>-<network>-firewall-<id>"
-        ]
-      },
-      "id": {
-        "title": "Rule ID",
-        "type": "string",
-        "description": "A unique identifier for the rule. If not specified, the name will be based on this field.",
-        "pattern": "^[a-z][a-z0-9-]{0,23}$",
-        "minLength": 1,
-        "maxLength": 24,
-        "examples": [
-          "example-rule-id-allow-tcp-443"
-        ]
-      },
-      "network": {
-        "title": "Network (VPC)",
-        "type": "string",
-        "description": "The network to which this rule is attached. If omitted, then network will be inherited.",
-        "pattern": "^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$",
-        "minLength": 5,
-        "maxLength": 63,
-        "examples": [
-          "default-vpc"
         ]
       },
       "project_id": {
@@ -106,14 +94,26 @@
           "my-example-project"
         ]
       },
-      "environment": {
-        "title": "Environment",
+      "network": {
+        "title": "Network (VPC)",
         "type": "string",
-        "description": "The environment to apply the rule to.",
+        "description": "The network to which this rule is attached. If omitted, then network will be inherited.",
+        "pattern": "^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$",
+        "minLength": 5,
+        "maxLength": 63,
         "examples": [
-          "prod",
-          "dev",
-          "stage"
+          "default-vpc"
+        ]
+      },
+      "id": {
+        "title": "Rule ID",
+        "type": "string",
+        "description": "A unique identifier for the rule. If not specified, the name will be based on this field.",
+        "pattern": "^[a-z0-9][a-z0-9-]{0,23}$",
+        "minLength": 1,
+        "maxLength": 24,
+        "examples": [
+          "example-rule-id-allow-tcp-443"
         ]
       },
       "prefix": {
@@ -124,110 +124,14 @@
           "fw-rule"
         ]
       },
-      "sources": {
-        "title": "Sources",
-        "type": "array",
-        "description": "List of source specifications for the firewall rule. Can be an IP CIDR range, a tag, or a service account email.",
-        "widget": "GenericList",
-        "items": {
-          "type": "string",
-          "oneOf": [
-            {
-              "title": "IP CIDR Range",
-              "type": "string",
-              "description": "IP space allocated to this subnetwork in CIDR format.",
-              "examples": [
-                "192.168.0.0/24"
-              ],
-              "pattern": "^(?:([0-9]|[1-9][0-9]{0,1}|1[0-9]{1,2}|2[0-4][0-9]|25[0-5])(\\.([0-9]|[1-9][0-9]{0,1}|1[0-9]{1,2}|2[0-4][0-9]|25[0-5])){3}/(([0-9]|[1-2][0-9]|3[0-2])))$"
-            },
-            {
-              "title": "Tag",
-              "type": "string",
-              "description": "Strings added to a tags field in a resource, such as Compute Engine virtual machine (VM) instances or instance templates. Tags enable you to make firewall rules and routes applicable to specific VM instances.",
-              "pattern": "^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$",
-              "maxLength": 63,
-              "examples": [
-                "alpha-tag",
-                "bravo-tag",
-                "charlie-tag",
-                "web-server",
-                "database"
-              ]
-            },
-            {
-              "title": "Service Account",
-              "description": "The email address of a service account. Firewall rules can target or be applied based on service accounts.",
-              "type": "string",
-              "pattern": "^\\S+@\\S+\\.\\S+$",
-              "maxLength": 63,
-              "examples": [
-                "project-number-compute@developer.gserviceaccount.com",
-                "project-id@appspot.gserviceaccount.com",
-                "project-number@cloudservices.gserviceaccount.com"
-              ]
-            }
-          ]
-        },
-        "default": [],
-        "minItems": 0,
+      "environment": {
+        "title": "Environment",
+        "type": "string",
+        "description": "The environment to apply the rule to.",
         "examples": [
-          "192.168.1.0/24",
-          "example-tag",
-          "example-service-account@example.com"
-        ]
-      },
-      "targets": {
-        "title": "Targets",
-        "type": "array",
-        "description": "List of target specifications for the firewall rule. Can be an IP CIDR range, a tag, or a service account email.",
-        "widget": "GenericList",
-        "items": {
-          "type": "string",
-          "oneOf": [
-            {
-              "title": "IP CIDR Range",
-              "type": "string",
-              "description": "IP space allocated to this subnetwork in CIDR format.",
-              "examples": [
-                "192.168.0.0/24"
-              ],
-              "pattern": "^(?:([0-9]|[1-9][0-9]{0,1}|1[0-9]{1,2}|2[0-4][0-9]|25[0-5])(\\.([0-9]|[1-9][0-9]{0,1}|1[0-9]{1,2}|2[0-4][0-9]|25[0-5])){3}/(([0-9]|[1-2][0-9]|3[0-2])))$"
-            },
-            {
-              "title": "Tag",
-              "type": "string",
-              "description": "Strings added to a tags field in a resource, such as Compute Engine virtual machine (VM) instances or instance templates. Tags enable you to make firewall rules and routes applicable to specific VM instances.",
-              "pattern": "^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$",
-              "maxLength": 63,
-              "examples": [
-                "alpha-tag",
-                "bravo-tag",
-                "charlie-tag",
-                "web-server",
-                "database"
-              ]
-            },
-            {
-              "title": "Service Account",
-              "description": "The email address of a service account. Firewall rules can target or be applied based on service accounts.",
-              "type": "string",
-              "pattern": "^\\S+@\\S+\\.\\S+$",
-              "maxLength": 63,
-              "examples": [
-                "project-number-compute@developer.gserviceaccount.com",
-                "project-id@appspot.gserviceaccount.com",
-                "project-number@cloudservices.gserviceaccount.com"
-              ]
-            }
-          ]
-        },
-        "default": [],
-        "minItems": 0,
-        "examples": [
-          "192.168.1.0/24",
-          "example-tag",
-          "example-service-account@example.com"
+          "prod",
+          "dev",
+          "stage"
         ]
       },
       "rules": {
@@ -399,14 +303,110 @@
           }
         ]
       },
-      "disabled": {
-        "title": "Disable Firewall Rule",
-        "type": "boolean",
-        "description": "Indicates if the rule is disabled.",
-        "default": false,
+      "sources": {
+        "title": "Sources",
+        "type": "array",
+        "description": "List of source specifications for the firewall rule. Can be an IP CIDR range, a tag, or a service account email.",
+        "widget": "GenericList",
+        "items": {
+          "type": "string",
+          "oneOf": [
+            {
+              "title": "IP CIDR Range",
+              "type": "string",
+              "description": "IP space allocated to this subnetwork in CIDR format.",
+              "examples": [
+                "192.168.0.0/24"
+              ],
+              "pattern": "^(?:([0-9]|[1-9][0-9]{0,1}|1[0-9]{1,2}|2[0-4][0-9]|25[0-5])(\\.([0-9]|[1-9][0-9]{0,1}|1[0-9]{1,2}|2[0-4][0-9]|25[0-5])){3}/(([0-9]|[1-2][0-9]|3[0-2])))$"
+            },
+            {
+              "title": "Tag",
+              "type": "string",
+              "description": "Strings added to a tags field in a resource, such as Compute Engine virtual machine (VM) instances or instance templates. Tags enable you to make firewall rules and routes applicable to specific VM instances.",
+              "pattern": "^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$",
+              "maxLength": 63,
+              "examples": [
+                "alpha-tag",
+                "bravo-tag",
+                "charlie-tag",
+                "web-server",
+                "database"
+              ]
+            },
+            {
+              "title": "Service Account",
+              "description": "The email address of a service account. Firewall rules can target or be applied based on service accounts.",
+              "type": "string",
+              "pattern": "^\\S+@\\S+\\.\\S+$",
+              "maxLength": 63,
+              "examples": [
+                "project-number-compute@developer.gserviceaccount.com",
+                "project-id@appspot.gserviceaccount.com",
+                "project-number@cloudservices.gserviceaccount.com"
+              ]
+            }
+          ]
+        },
+        "default": [],
+        "minItems": 0,
         "examples": [
-          true,
-          false
+          "192.168.1.0/24",
+          "example-tag",
+          "example-service-account@example.com"
+        ]
+      },
+      "targets": {
+        "title": "Targets",
+        "type": "array",
+        "description": "List of target specifications for the firewall rule. Can be an IP CIDR range, a tag, or a service account email.",
+        "widget": "GenericList",
+        "items": {
+          "type": "string",
+          "oneOf": [
+            {
+              "title": "IP CIDR Range",
+              "type": "string",
+              "description": "IP space allocated to this subnetwork in CIDR format.",
+              "examples": [
+                "192.168.0.0/24"
+              ],
+              "pattern": "^(?:([0-9]|[1-9][0-9]{0,1}|1[0-9]{1,2}|2[0-4][0-9]|25[0-5])(\\.([0-9]|[1-9][0-9]{0,1}|1[0-9]{1,2}|2[0-4][0-9]|25[0-5])){3}/(([0-9]|[1-2][0-9]|3[0-2])))$"
+            },
+            {
+              "title": "Tag",
+              "type": "string",
+              "description": "Strings added to a tags field in a resource, such as Compute Engine virtual machine (VM) instances or instance templates. Tags enable you to make firewall rules and routes applicable to specific VM instances.",
+              "pattern": "^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$",
+              "maxLength": 63,
+              "examples": [
+                "alpha-tag",
+                "bravo-tag",
+                "charlie-tag",
+                "web-server",
+                "database"
+              ]
+            },
+            {
+              "title": "Service Account",
+              "description": "The email address of a service account. Firewall rules can target or be applied based on service accounts.",
+              "type": "string",
+              "pattern": "^\\S+@\\S+\\.\\S+$",
+              "maxLength": 63,
+              "examples": [
+                "project-number-compute@developer.gserviceaccount.com",
+                "project-id@appspot.gserviceaccount.com",
+                "project-number@cloudservices.gserviceaccount.com"
+              ]
+            }
+          ]
+        },
+        "default": [],
+        "minItems": 0,
+        "examples": [
+          "192.168.1.0/24",
+          "example-tag",
+          "example-service-account@example.com"
         ]
       },
       "priority": {
@@ -462,7 +462,7 @@
     "shared": {
       "properties": {
         "action": {
-          "title": "Rule Action",
+          "title": "Action",
           "description": "Defines whether the rule allows or denies traffic.",
           "type": "string",
           "widget": "Select",
@@ -485,7 +485,7 @@
           ]
         },
         "direction": {
-          "title": "Rule Direction",
+          "title": "Direction",
           "description": "The direction of traffic to which this rule applies. Can be ingress (incoming traffic) or egress (outgoing traffic).",
           "type": "string",
           "widget": "Select",
@@ -549,7 +549,7 @@
           "title": "Rule ID",
           "type": "string",
           "description": "A unique identifier for the rule. If not specified, the name will be based on this field.",
-          "pattern": "^[a-z][a-z0-9-]{0,23}$",
+          "pattern": "^[a-z0-9][a-z0-9-]{0,23}$",
           "minLength": 1,
           "maxLength": 24,
           "examples": [
@@ -587,7 +587,7 @@
           "pattern": "^(?:([0-9]|[1-9][0-9]{0,1}|1[0-9]{1,2}|2[0-4][0-9]|25[0-5])(\\.([0-9]|[1-9][0-9]{0,1}|1[0-9]{1,2}|2[0-4][0-9]|25[0-5])){3}/(([0-9]|[1-2][0-9]|3[0-2])))$"
         },
         "name": {
-          "title": "Firewall Rule Name",
+          "title": "Name",
           "type": "string",
           "description": "The name of the firewall rule. If not specified, it will be based on the id field.",
           "pattern": "^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$",

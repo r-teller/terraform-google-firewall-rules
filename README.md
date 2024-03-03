@@ -7,6 +7,12 @@ It supports mixed values in both the source and target JSON field and uses strin
 -  subnet_ranges    = `if can(cidrnetmask(x))`
 
 
+## JSON Generator
+https://r-teller.github.io/terraform-google-firewall-rules
+
+## JSON Schema Documentation
+https://r-teller.github.io/terraform-google-firewall-rules/documentation/
+
 ## Include Implicit Addresses
 
 This module incorporates a feature to enhance clarity around the specification of source and destination addresses in firewall rules. By default, Google Cloud assumes the IPv4 address range of 0.0.0.0/0 (representing any IPv4 address) for any ingress rule without a specified source or any egress rule without a specified destination. To make this behavior explicit and enhance rule readability, this module automatically includes these default addresses as rule attributes.

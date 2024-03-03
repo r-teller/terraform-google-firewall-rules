@@ -2,7 +2,7 @@
     {
         "id": "44444",
         "description": "This rule will allow all traffic from 192.168.13.0/32 and instances tagged with some_network_tag to some_network_tag",
-        "action": "allow",
+        "action": "ALLOW",
         "direction": "INGRESS",
         "log_config": "EXCLUDE_ALL_METADATA",
         "priority": 1000,

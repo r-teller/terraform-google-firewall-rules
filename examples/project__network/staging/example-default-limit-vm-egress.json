@@ -2,8 +2,8 @@
     {
         "id": "fffd",
         "description": "This rule will deny traffic from VMs tagged with deny-egress-to-all to 0.0.0.0/0",
-        "action": "deny",
-        "direction": "egress",
+        "action": "DENY",
+        "direction": "EGRESS",
         "log_config": "EXCLUDE_ALL_METADATA",
         "priority": 65534,
         "sources": [
@@ -22,8 +22,8 @@
     {
         "id": "fffe",
         "description": "This rule will allow traffic from VMs tagged with allow-egress-to-rfc1918 to 10.0.0.0/8, 172.16.0.0/12 and 192.168.0.0/16",
-        "action": "allow",
-        "direction": "egress",
+        "action": "ALLOW",
+        "direction": "EGRESS",
         "log_config": "EXCLUDE_ALL_METADATA",
         "priority": 65533,
         "sources": [
@@ -44,8 +44,8 @@
     {
         "id": "fffd-new",
         "description": "This rule will deny traffic from VMs tagged with deny-egress-to-all or 100.64.0.0/10 to 0.0.0.0/0",
-        "action": "deny",
-        "direction": "egress",
+        "action": "DENY",
+        "direction": "EGRESS",
         "log_config": "EXCLUDE_ALL_METADATA",
         "priority": 65534,
         "sources": [
@@ -65,8 +65,8 @@
     {
         "id": "fffe-new",
         "description": "This rule will allow traffic from VMs tagged with allow-egress-to-rfc1918 and 100.64.0.0/10 to 10.0.0.0/8, 172.16.0.0/12 and 192.168.0.0/16",
-        "action": "allow",
-        "direction": "egress",
+        "action": "ALLOW",
+        "direction": "EGRESS",
         "log_config": "EXCLUDE_ALL_METADATA",
         "priority": 65533,
         "sources": [

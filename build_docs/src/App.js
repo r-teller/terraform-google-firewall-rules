@@ -9,9 +9,9 @@ import validator from '@rjsf/validator-ajv8';
 import './modal.css';
 import './firewall-rules.css'
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCopy, faEye, faBook } from '@fortawesome/free-solid-svg-icons';
+import { faCopy, faEye, faBook, faShareAlt } from '@fortawesome/free-solid-svg-icons';
 
 
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -76,6 +76,17 @@ function App() {
     });
   };
 
+  // Function to generate and copy the shareable link
+  const shareFormData = () => {
+    const base64EncodedData = btoa(JSON.stringify(formData.firewall_rules));
+    const currentUrl = window.location.href.split('?')[0]; // Remove existing query parameters if any
+    const shareableLink = `${currentUrl}?formData=${base64EncodedData}`;
+
+    navigator.clipboard.writeText(shareableLink).then(() => { }, (err) => {
+      console.error('Failed to copy shareable link: ', err);
+    });
+  };
+
   const loadJsonFromModal = async () => {
     try {
       const formData = JSON.parse(modalInputData)
@@ -90,6 +101,46 @@ function App() {
   const handleFormDataChange = ({ formData }) => {
     setFormData(formData);
   };
+
+  useEffect(() => {
+    // Function to parse query parameters and remove them
+    const parseAndCleanQueryParams = () => {
+      const queryParams = new URLSearchParams(window.location.search);
+      const formDataParam = queryParams.get('formData');
+      if (formDataParam) {
+        try {
+          const decodedData = JSON.parse(atob(formDataParam));
+          setFormData({ firewall_rules: decodedData });
+          // Remove the query parameter from the URL
+          const newUrl = window.location.pathname;
+          window.history.replaceState({}, '', newUrl);
+        } catch (error) {
+          console.error('Error decoding formData from URL parameter:', error);
+        }
+      }
+    };
+
+    parseAndCleanQueryParams();
+  }, []);
+
+
+  // useEffect(() => {
+  //   // Function to parse query parameters
+  //   const parseQueryParams = () => {
+  //     const queryParams = new URLSearchParams(window.location.search);
+  //     const formDataParam = queryParams.get('formData');
+  //     if (formDataParam) {
+  //       try {
+  //         const decodedData = JSON.parse(atob(formDataParam));
+  //         setFormData({ firewall_rules: decodedData });
+  //       } catch (error) {
+  //         console.error('Error decoding formData from URL parameter:', error);
+  //       }
+  //     }
+  //   };
+
+  //   parseQueryParams();
+  // }, []);
 
   const handleModalInputChange = (e) => {
     try {
@@ -119,8 +170,10 @@ function App() {
   return (
     <div className="App container mt-5">
 
-      <center>
-
+      <center style={{ paddingBottom: '15px' }}>
+        <button onClick={shareFormData} className="btn btn-info btn-lg" title="Share FormData">
+          <FontAwesomeIcon icon={faShareAlt} /> Share FormData
+        </button>
         <button onClick={() => copyJsonToClipboard(formData)} className="btn btn-info btn-lg" title="Copy to Clipboard">
           <FontAwesomeIcon icon={faCopy} /> Copy FormData
         </button>
