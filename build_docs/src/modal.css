@@ -16,15 +16,10 @@
     margin: 0;
 }
 
-.acheckbox input[type="checkbox"] {
-    transform: scale(2);
-    margin: 15px;
-    padding-top: 30px;
-}
+
 
 
 .editable-pre {
-
     font-family: monospace;
     width: 100%;
     height: auto;
@@ -38,4 +33,80 @@
     white-space: pre-wrap;
     word-wrap: break-word;
 
+}
+
+/* Container for the label and the slider */
+.controls-container {
+    display: flex;
+    align-items: center;
+    /* Center items vertically */
+    gap: 10px;
+    /* Space between items */
+    padding: 10px;
+    /* Padding around the container */
+}
+
+/* Style for the label */
+.custom-control-label {
+    white-space: nowrap;
+    margin-right: 10px;
+    /* Space between the label and the slider */
+}
+
+/* Base style for the slider */
+.custom-control.custom-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    /* Width of the slider */
+    height: 34px;
+    /* Height of the slider */
+}
+
+/* Hide the default checkbox */
+.custom-control-input {
+    opacity: 0;
+    position: absolute;
+    width: 0;
+    height: 0;
+}
+
+/* Style for the slider background */
+.slider-round {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    /* Slider background when off */
+    transition: .4s;
+    border-radius: 34px;
+}
+
+/* Style for the slider circle */
+.slider-round:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    /* Circle height */
+    width: 26px;
+    /* Circle width */
+    left: 4px;
+    bottom: 2px;
+    /* Adjusted to center the circle vertically */
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+/* Move the slider circle to the right on check */
+.custom-control-input:checked+.slider-round:before {
+    transform: translateX(20px);
+}
+
+/* Change slider background color when checked */
+.custom-control-input:checked+.slider-round {
+    background-color: #2196F3;
 }

@@ -270,6 +270,8 @@
                     ]
                   },
                   "ports": {
+                    "title": "Ports or Port-Ranges (Empty)",
+                    "description": "For protocols other than TCP/UDP this should be an empty list.",
                     "type": "array",
                     "items": {
                       "type": "string",
@@ -902,6 +904,8 @@
                     ]
                   },
                   "ports": {
+                    "title": "Ports or Port-Ranges (Empty)",
+                    "description": "For protocols other than TCP/UDP this should be an empty list.",
                     "type": "array",
                     "items": {
                       "type": "string",
@@ -1054,6 +1058,8 @@
                       ]
                     },
                     "ports": {
+                      "title": "Ports or Port-Ranges (Empty)",
+                      "description": "For protocols other than TCP/UDP this should be an empty list.",
                       "type": "array",
                       "items": {
                         "type": "string",
@@ -1107,6 +1113,8 @@
               ]
             },
             "ports": {
+              "title": "Ports or Port-Ranges (Empty)",
+              "description": "For protocols other than TCP/UDP this should be an empty list.",
               "type": "array",
               "items": {
                 "type": "string",

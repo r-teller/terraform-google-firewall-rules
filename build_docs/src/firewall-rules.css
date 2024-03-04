@@ -1,12 +1,51 @@
 .firewall-rules-parent .firewall-rule-disabled-checkbox {
     display: inline-block;
-    vertical-align: top;
-    margin-right: 4px;
-    transform: scale(2);
+    vertical-align: middle;
+    margin-right: 5px;
+    transform: scale(1.5);
     width: 30px;
-    padding-top: 11px;
+    margin-top: 3.5px;
+    padding-left: 5px;
 }
 
+.form-group.field.field-boolean.firewall-rule-disabled-checkbox .checkbox input[type="checkbox"] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background-color: transparent;
+    position: relative;
+    cursor: pointer;
+    outline: none;
+}
+
+.form-group.field.field-boolean.firewall-rule-disabled-checkbox .checkbox input[type="checkbox"]:before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 20px;
+    height: 20px;
+    background-color: green;
+    border-radius: 50%;
+}
+
+/* Checked state: circle with a red "X" */
+.form-group.field.field-boolean.firewall-rule-disabled-checkbox .checkbox input[type="checkbox"]:checked:before {
+    content: '✖';
+    color: white;
+    font-size: 25px;
+    line-height: 20px;
+    text-align: center;
+    background-color: red;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    transform: translate(-50%, 0);
+}
 
 .form-group.field.field-string .control-label,
 .form-group.field.field-string .MuiButtonBase-root,
@@ -21,6 +60,14 @@
 .form-group.field.field-integer .MuiButtonBase-root {
     margin: 0;
     padding: 0;
+}
+
+.firewall-rules-parent .one-tenth-width-input {
+    display: inline-block;
+    vertical-align: top;
+    width: calc(10.5% - 6px);
+    margin-right: 4px;
+    box-sizing: border-box;
 }
 
 
@@ -129,4 +176,16 @@
     color: #333;
     font-weight: bold;
     border-bottom: 1.5px solid;
+}
+
+/* Target the IP Protocol dropdown specifically */
+.rules-protocol label {
+    width: 100%;
+    /* border-bottom: 1px solid; */
+    border-bottom: 1px solid #e5e5e5
+}
+
+/* Ensure the dropdown takes the full width of its container */
+.rules-protocol select {
+    margin-top: 15px;
 }

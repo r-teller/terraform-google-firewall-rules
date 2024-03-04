@@ -23,7 +23,7 @@
         ],
         "disabled": {
             "ui:label": false,
-            "ui:classNames": "firewall-rule-disabled-checkbox"
+            "ui:classNames": "one-tenth-width firewall-rule-disabled-checkbox"
         },
         "name": {
             "ui:classNames": "half-width-input"
@@ -58,14 +58,14 @@
                 "ui:classNames": "full-width-input",
                 "ui:label": false,
                 "ports": {
-                    "ui:classNames": "two-thirds-width-input",
+                    "ui:classNames": "two-thirds-width-input rules-ports",
                     "items": {
                         "ui:field": "StringField",
                         "ui:fieldReplacesAnyOrOneOf": true
                     }
                 },
                 "protocol": {
-                    "ui:classNames": "one-third-width-input"
+                    "ui:classNames": "one-third-width-input rules-protocol"
                 }
             }
         },

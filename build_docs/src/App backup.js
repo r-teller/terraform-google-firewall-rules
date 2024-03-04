@@ -1,121 +1,155 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import Form from '@rjsf/core';
-import Ajv from 'ajv';
-import validator from '@rjsf/validator-ajv8';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCopy, faEye, faBook, faShareAlt } from '@fortawesome/free-solid-svg-icons';
+
+import { default as Form } from '@rjsf/core';
+
 import firewallRulesRawSchema from './schemas/JSONSchema.json';
 import firewallRulesUISchema from './schemas/UISchema.json';
+import Ajv from 'ajv';
+
+import validator from '@rjsf/validator-ajv8';
 import './modal.css';
-import './firewall-rules.css';
+import './firewall-rules.css'
+
+import React, { useState, useEffect, useCallback } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCopy, faEye, faBook, faShareAlt } from '@fortawesome/free-solid-svg-icons';
+
+
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-// Initialize AJV with options suitable for your needs
+// // Initialize AJV with options suitable for your needs
 const ajv = new Ajv({ strict: false, allErrors: true, useDefaults: true });
-const validate = ajv.compile(firewallRulesRawSchema);
 
+const validate = ajv.compile(firewallRulesRawSchema)
 const schema = {
   type: "object",
   properties: {
     firewall_rules: firewallRulesRawSchema
   }
-};
+}
 
 const uiSchema = {
   'firewall_rules': firewallRulesUISchema,
   'ui:submitButtonOptions': {
     norender: true
   },
-};
+}
 
 function DescriptionFieldTemplate(props) {
-  return null; // Ensure you have a valid return for all your components, even if null
+  return null;
 }
 
 function formatErrors(errors) {
   return errors
-    .filter(error => error.keyword !== 'const' && error.keyword !== 'x') // Good practice to filter out unnecessary errors
+    .filter(error => error.keyword !== 'const' && error.keyword !== 'x') // Exclude errors with 'const' or 'x'
     .map(error => `${error.instancePath}, ${error.schemaPath}, ${error.message}`)
-    .join('\n'); // Joining errors with newline for better readability
+    .join('\n'); // Join errors with newline for title attribute usage
 }
 
 function App() {
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState({}); // Initial form data
   const [showModal, setShowModal] = useState(false);
   const [isInputValid, setIsInputValid] = useState(true);
-  const [validateSchema, setValidateSchema] = useState(true);
+  const [validateSchema, setValidateSchema] = useState(true); // New state for toggling schema validation
   const [modalInputData, setModalInputData] = useState("");
   const [errorTitle, setErrorTitle] = useState('');
 
-  // Reset form data to initial state
   const resetFormData = () => {
-    setFormData({});
+    setFormData({}); // Reset form data to initial state, adjust { } as needed
   };
 
-  // Copy JSON to clipboard
   const copyJsonToClipboard = (formData) => {
     const dataStr = JSON.stringify(formData.firewall_rules, null, 2);
-    navigator.clipboard.writeText(dataStr).catch(err => {
+    navigator.clipboard.writeText(dataStr).then(() => { }, (err) => {
       console.error('Could not copy text: ', err);
     });
   };
 
-  // Generate and copy the shareable link
+  // Function to generate and copy the shareable link
   const shareFormData = () => {
     const base64EncodedData = btoa(JSON.stringify(formData.firewall_rules));
-    const currentUrl = window.location.href.split('?')[0];
+    const currentUrl = window.location.href.split('?')[0]; // Remove existing query parameters if any
     const shareableLink = `${currentUrl}?formData=${base64EncodedData}`;
 
-    navigator.clipboard.writeText(shareableLink).catch(err => {
+    navigator.clipboard.writeText(shareableLink).then(() => { }, (err) => {
       console.error('Failed to copy shareable link: ', err);
     });
   };
 
-  // Load JSON from modal
   const loadJsonFromModal = async () => {
     try {
-      const formData = JSON.parse(modalInputData);
-      setFormData({ firewall_rules: formData });
+      const formData = JSON.parse(modalInputData)
+      setFormData({ firewall_rules: formData }); // Update your form's state
       toggleModal();
     } catch (err) {
       console.error('Failed to load JSON from clipboard:', err);
     }
   };
 
-  // Toggle schema validation
   const toggleSchemaValidation = () => {
     setValidateSchema(!validateSchema);
+    validateModalTextArea()
   };
 
-  // Validate modal text area
   const validateModalTextArea = useCallback(() => {
-    if (!validateSchema) {
-      setIsInputValid(true);
-      setErrorTitle('');
-      return;
-    }
     try {
+      console.log("Schema => " + validateSchema)
       const inputData = JSON.parse(modalInputData);
       const valid = validate(inputData);
-      setIsInputValid(valid);
-      setErrorTitle(valid ? '' : formatErrors(validate.errors));
+      if (validateSchema) {
+        setIsInputValid(valid);
+        if (!valid) {
+          setErrorTitle(formatErrors(validate.errors));
+        } else {
+          setErrorTitle(''); // Clear error title if valid
+        }
+      } else {
+        setIsInputValid(true); // If validation is turned off, always set to valid
+        setErrorTitle(''); // Clear any existing error messages
+      }
     } catch (err) {
       setIsInputValid(false);
-      setErrorTitle(err.toString());
+      setErrorTitle(err.toString()); // Display the error message
     }
-  }, [validateSchema, modalInputData]);
+  }, [validateSchema, modalInputData, validate, formatErrors]); // Include all dependencies here
 
-  // Effect to validate the modal text area when `validateSchema` or `modalInputData` changes
   useEffect(() => {
     validateModalTextArea();
-  }, [validateModalTextArea]);
+  }, [validateModalTextArea]); // Now validateModalTextArea is a dependency, but it's memoized with useCallback
 
-  // Handle form data change
+  // const validateModalTextArea = () => {
+  //   try {
+  //     console.log("Schema => " + modalInputData)
+  //     const inputData = JSON.parse(modalInputData);
+  //     const valid = validate(inputData);
+  //     console.log("Validation => " + validateSchema)
+  //     if (validateSchema) {
+  //       setIsInputValid(valid)
+  //     } else {
+  //       setIsInputValid(true)
+  //     }
+
+  //     if (!valid) {
+  //       setErrorTitle(formatErrors(validate.errors));
+  //     }
+
+  //   } catch (err) {
+  //     setIsInputValid(false)
+  //     setErrorTitle(err)
+
+  //   }
+  // }
+
+  // useEffect(() => {
+  //   validateModalTextArea(); // Call the validation function when the schema validation state changes
+  // }, [validateSchema, modalInputData]);
+
+  // Used to track state for main form
   const handleFormDataChange = ({ formData }) => {
     setFormData(formData);
   };
 
   useEffect(() => {
+    // Function to parse query parameters and remove them
     const parseAndCleanQueryParams = () => {
       const queryParams = new URLSearchParams(window.location.search);
       const formDataParam = queryParams.get('formData');
@@ -131,31 +165,49 @@ function App() {
         }
       }
     };
-  
+
+
     parseAndCleanQueryParams();
   }, []);
 
-  // Handle modal input change
+
+
   const handleModalInputChange = (e) => {
-    const input = e.target.value;
-    setModalInputData(input);
-    // Optionally, validate as user types or on input change
-    // validateModalTextArea();
+    try {
+      const inputData = JSON.parse(e.target.value);
+      const valid = validate(inputData);
+      console.log("Schema => " + valid)
+      console.log("Validation => " + validateSchema)
+      if (validateSchema) {
+        setIsInputValid(valid)
+      } else {
+        setIsInputValid(true)
+      }
+
+      if (!valid) {
+        setErrorTitle(formatErrors(validate.errors));
+      }
+
+    } catch (err) {
+      setIsInputValid(false)
+      setErrorTitle(err)
+
+    }
+    // // Update modal input data without affecting formData
+    setModalInputData(e.target.value);
   };
 
-  // Toggle modal visibility
   const toggleModal = () => {
-    setShowModal(!showModal);
+    setShowModal(!showModal)
     if (!showModal) {
-      // Pre-fill modal with current formData when opening
       setModalInputData(JSON.stringify(formData.firewall_rules, null, 2));
     }
   };
 
   return (
     <div className="App container mt-5">
+
       <center style={{ paddingBottom: '15px' }}>
-        {/* Button actions */}
         <button onClick={shareFormData} className="btn btn-info btn-lg" title="Share FormData">
           <FontAwesomeIcon icon={faShareAlt} /> Share FormData
         </button>
@@ -173,10 +225,12 @@ function App() {
         </button>
       </center>
 
-      {/* Modal for editing/viewing JSON */}
+
+      {/* Modal */}
       {showModal && (
         <div id="myModal" className="modal fade in" role="dialog" style={{ display: 'block' }}>
           <div className="modal-dialog">
+            {/* Modal content*/}
             <div className="modal-content">
               <div className="modal-header">
                 <button type="button" className="close" onClick={toggleModal}>&times;</button>
@@ -184,8 +238,8 @@ function App() {
               </div>
               <div className="modal-body">
                 <textarea className="editable-pre"
-                  rows="25"
-                  cols="50"
+                  rows="25" // Adjust the number of rows as needed
+                  cols="50" // Adjust the number of columns as needed
                   value={modalInputData}
                   onChange={handleModalInputChange}
                   style={{ whiteSpace: "pre-wrap" }}
@@ -193,22 +247,30 @@ function App() {
               </div>
               <div className="modal-footer">
                 <div className="controls-container">
-                  <label className="custom-control-label">Enable Schema Validation</label>
-                  <div className="custom-control custom-switch">
+
+                  <label class="custom-control-label">Enable Schema Validation</label>
+                  <div class="custom-control custom-switch">
                     <input
                       type="checkbox"
-                      className="custom-control-input"
+                      class="custom-control-input"
                       id="schemaValidationToggle"
+                      // onClick={validateSchema}
+                      // onClick={console.log("RedPanda was here v2")}
                       onChange={toggleSchemaValidation}
-                      checked={validateSchema}
+                      // checked
+                      checked={validateSchema} // This line ensures the checkbox reflects the state
+                    // onChange={() => console.log("Checkbox state changed")}
                     />
-                    <label className="slider-round" htmlFor="schemaValidationToggle"></label>
+                    <label class="slider-round" for="schemaValidationToggle"></label>
+
                   </div>
+
+
                   <button type="button"
                     title={!isInputValid ? errorTitle : ""}
                     disabled={!isInputValid}
                     className="btn btn-warning"
-                    onClick={loadJsonFromModal}>Load JSON</button>
+                    onClick={() => loadJsonFromModal(modalInputData)}>Load JSON</button>
                   <button type="button" className="btn btn-secondary" onClick={() => copyJsonToClipboard(formData)}>Copy JSON</button>
                   <button type="button" className="btn btn-primary" onClick={toggleModal}>Close</button>
                 </div>
@@ -219,16 +281,24 @@ function App() {
       )}
       {showModal && <div className="modal-backdrop fade in"></div>}
 
+
+      {/* "ui:ArrayFieldTemplate": "ArrayFieldTemplate", */}
+      {/* "ui:DescriptionFieldTemplate": "DescriptionFieldTemplate", */}
       <Form
         schema={schema}
         uiSchema={uiSchema}
+        // onSubmit={onSubmit}
         formData={formData}
         onChange={handleFormDataChange}
         liveValidate
         validator={validator}
+
         templates={{
           DescriptionFieldTemplate,
+          // CustomFieldTemplate,
         }}
+      // FieldTemplate={{ CustomFieldTemplate }}
+      // fields={{ ArrayFieldTemplate }}
       />
     </div>
   );
