@@ -3,7 +3,6 @@
   "title": "Collection of Firewall Rules",
   "type": "array",
   "uniqueItems": true,
-  "widget": "GenericList",
   "items": {
     "type": "object",
     "title": "Firewall Rule",
@@ -33,7 +32,6 @@
         "title": "Action",
         "description": "Defines whether the rule allows or denies traffic.",
         "type": "string",
-        "widget": "Select",
         "oneOf": [
           {
             "const": "ALLOW",
@@ -56,7 +54,6 @@
         "title": "Direction",
         "description": "The direction of traffic to which this rule applies. Can be ingress (incoming traffic) or egress (outgoing traffic).",
         "type": "string",
-        "widget": "Select",
         "oneOf": [
           {
             "const": "INGRESS",
@@ -138,7 +135,6 @@
         "title": "Protocol and Port list",
         "description": "A list of individual rules that define the behavior of the firewall rule based on specified conditions of protocol and port combinations.",
         "type": "array",
-        "widget": "SimpleList",
         "uniqueItems": true,
         "minItems": 1,
         "items": {
@@ -149,7 +145,6 @@
               "title": "IP Protocol",
               "description": "The IP protocol to which this rule applies. The value can be TCP, UDP, ICMP, or ALL.",
               "type": "string",
-              "widget": "Select",
               "enum": [
                 "ALL",
                 "AH",
@@ -193,7 +188,6 @@
                     "title": "IP Protocol",
                     "description": "The IP protocol to which this rule applies. The value can be TCP, UDP, ICMP, or ALL.",
                     "type": "string",
-                    "widget": "Select",
                     "enum": [
                       "ALL",
                       "AH",
@@ -215,7 +209,6 @@
                     "title": "Ports or Port-Ranges",
                     "description": "A list of ports or port-ranges to which the firewall rule will apply. If no port or port range is specified, all ranges are applied.",
                     "type": "array",
-                    "widget": "GenericList",
                     "items": {
                       "type": "string",
                       "oneOf": [
@@ -259,7 +252,6 @@
                     "title": "IP Protocol",
                     "description": "The IP protocol to which this rule applies. The value can be TCP, UDP, ICMP, or ALL.",
                     "type": "string",
-                    "widget": "Select",
                     "enum": [
                       "ALL",
                       "AH",
@@ -279,10 +271,8 @@
                   },
                   "ports": {
                     "type": "array",
-                    "widget": "GenericList",
                     "items": {
                       "type": "string",
-                      "deleteOnEmpty": true,
                       "maxLength": 0,
                       "pattern": "^(?!.*)"
                     },
@@ -307,7 +297,6 @@
         "title": "Sources",
         "type": "array",
         "description": "List of source specifications for the firewall rule. Can be an IP CIDR range, a tag, or a service account email.",
-        "widget": "GenericList",
         "items": {
           "type": "string",
           "oneOf": [
@@ -321,7 +310,7 @@
               "pattern": "^(?:([0-9]|[1-9][0-9]{0,1}|1[0-9]{1,2}|2[0-4][0-9]|25[0-5])(\\.([0-9]|[1-9][0-9]{0,1}|1[0-9]{1,2}|2[0-4][0-9]|25[0-5])){3}/(([0-9]|[1-2][0-9]|3[0-2])))$"
             },
             {
-              "title": "Tag",
+              "title": "Network Tag",
               "type": "string",
               "description": "Strings added to a tags field in a resource, such as Compute Engine virtual machine (VM) instances or instance templates. Tags enable you to make firewall rules and routes applicable to specific VM instances.",
               "pattern": "^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$",
@@ -360,7 +349,6 @@
         "title": "Targets",
         "type": "array",
         "description": "List of target specifications for the firewall rule. Can be an IP CIDR range, a tag, or a service account email.",
-        "widget": "GenericList",
         "items": {
           "type": "string",
           "oneOf": [
@@ -374,7 +362,7 @@
               "pattern": "^(?:([0-9]|[1-9][0-9]{0,1}|1[0-9]{1,2}|2[0-4][0-9]|25[0-5])(\\.([0-9]|[1-9][0-9]{0,1}|1[0-9]{1,2}|2[0-4][0-9]|25[0-5])){3}/(([0-9]|[1-2][0-9]|3[0-2])))$"
             },
             {
-              "title": "Tag",
+              "title": "Network Tag",
               "type": "string",
               "description": "Strings added to a tags field in a resource, such as Compute Engine virtual machine (VM) instances or instance templates. Tags enable you to make firewall rules and routes applicable to specific VM instances.",
               "pattern": "^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$",
@@ -450,6 +438,118 @@
         ]
       }
     },
+    "allOf": [
+      {
+        "title": "Service-Accounts and Network Tags Mixing Validation",
+        "description": "Ensures that if `Service-Accounts` are specified in either `Sources` or `Targets`, only `IP CIDR Ranges` or `Service-Accounts` can be included in them.",
+        "if": {
+          "anyOf": [
+            {
+              "title": "Check for Service-Account in Sources",
+              "description": "Validates the presence of a service account in the sources array.",
+              "properties": {
+                "sources": {
+                  "type": "array",
+                  "contains": {
+                    "title": "Service Account",
+                    "description": "The email address of a service account. Firewall rules can target or be applied based on service accounts.",
+                    "type": "string",
+                    "pattern": "^\\S+@\\S+\\.\\S+$",
+                    "maxLength": 63,
+                    "examples": [
+                      "project-number-compute@developer.gserviceaccount.com",
+                      "project-id@appspot.gserviceaccount.com",
+                      "project-number@cloudservices.gserviceaccount.com"
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "title": "Check for Service-Account in Targets",
+              "description": "Validates the presence of a service account in the targets array.",
+              "properties": {
+                "targets": {
+                  "type": "array",
+                  "contains": {
+                    "title": "Service Account",
+                    "description": "The email address of a service account. Firewall rules can target or be applied based on service accounts.",
+                    "type": "string",
+                    "pattern": "^\\S+@\\S+\\.\\S+$",
+                    "maxLength": 63,
+                    "examples": [
+                      "project-number-compute@developer.gserviceaccount.com",
+                      "project-id@appspot.gserviceaccount.com",
+                      "project-number@cloudservices.gserviceaccount.com"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "then": {
+          "properties": {
+            "sources": {
+              "type": "array",
+              "items": {
+                "oneOf": [
+                  {
+                    "title": "IP CIDR Range",
+                    "type": "string",
+                    "description": "IP space allocated to this subnetwork in CIDR format.",
+                    "examples": [
+                      "192.168.0.0/24"
+                    ],
+                    "pattern": "^(?:([0-9]|[1-9][0-9]{0,1}|1[0-9]{1,2}|2[0-4][0-9]|25[0-5])(\\.([0-9]|[1-9][0-9]{0,1}|1[0-9]{1,2}|2[0-4][0-9]|25[0-5])){3}/(([0-9]|[1-2][0-9]|3[0-2])))$"
+                  },
+                  {
+                    "title": "Service Account",
+                    "description": "The email address of a service account. Firewall rules can target or be applied based on service accounts.",
+                    "type": "string",
+                    "pattern": "^\\S+@\\S+\\.\\S+$",
+                    "maxLength": 63,
+                    "examples": [
+                      "project-number-compute@developer.gserviceaccount.com",
+                      "project-id@appspot.gserviceaccount.com",
+                      "project-number@cloudservices.gserviceaccount.com"
+                    ]
+                  }
+                ]
+              }
+            },
+            "targets": {
+              "type": "array",
+              "items": {
+                "oneOf": [
+                  {
+                    "title": "IP CIDR Range",
+                    "type": "string",
+                    "description": "IP space allocated to this subnetwork in CIDR format.",
+                    "examples": [
+                      "192.168.0.0/24"
+                    ],
+                    "pattern": "^(?:([0-9]|[1-9][0-9]{0,1}|1[0-9]{1,2}|2[0-4][0-9]|25[0-5])(\\.([0-9]|[1-9][0-9]{0,1}|1[0-9]{1,2}|2[0-4][0-9]|25[0-5])){3}/(([0-9]|[1-2][0-9]|3[0-2])))$"
+                  },
+                  {
+                    "title": "Service Account",
+                    "description": "The email address of a service account. Firewall rules can target or be applied based on service accounts.",
+                    "type": "string",
+                    "pattern": "^\\S+@\\S+\\.\\S+$",
+                    "maxLength": 63,
+                    "examples": [
+                      "project-number-compute@developer.gserviceaccount.com",
+                      "project-id@appspot.gserviceaccount.com",
+                      "project-number@cloudservices.gserviceaccount.com"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    ],
     "required": [
       "direction",
       "action",
@@ -465,7 +565,6 @@
           "title": "Action",
           "description": "Defines whether the rule allows or denies traffic.",
           "type": "string",
-          "widget": "Select",
           "oneOf": [
             {
               "const": "ALLOW",
@@ -488,7 +587,6 @@
           "title": "Direction",
           "description": "The direction of traffic to which this rule applies. Can be ingress (incoming traffic) or egress (outgoing traffic).",
           "type": "string",
-          "widget": "Select",
           "oneOf": [
             {
               "const": "INGRESS",
@@ -628,7 +726,6 @@
           "title": "Port Ranges",
           "description": "Ranges of ports to be either allowed or denied",
           "type": "array",
-          "widget": "SimpleList",
           "uniqueItems": true,
           "items": {
             "type": "string",
@@ -655,7 +752,6 @@
           "title": "IP Protocol",
           "description": "The IP protocol to which this rule applies. The value can be TCP, UDP, ICMP, or ALL.",
           "type": "string",
-          "widget": "Select",
           "enum": [
             "ALL",
             "AH",
@@ -681,7 +777,6 @@
               "title": "IP Protocol",
               "description": "The IP protocol to which this rule applies. The value can be TCP, UDP, ICMP, or ALL.",
               "type": "string",
-              "widget": "Select",
               "enum": [
                 "ALL",
                 "AH",
@@ -725,7 +820,6 @@
                     "title": "IP Protocol",
                     "description": "The IP protocol to which this rule applies. The value can be TCP, UDP, ICMP, or ALL.",
                     "type": "string",
-                    "widget": "Select",
                     "enum": [
                       "ALL",
                       "AH",
@@ -747,7 +841,6 @@
                     "title": "Ports or Port-Ranges",
                     "description": "A list of ports or port-ranges to which the firewall rule will apply. If no port or port range is specified, all ranges are applied.",
                     "type": "array",
-                    "widget": "GenericList",
                     "items": {
                       "type": "string",
                       "oneOf": [
@@ -791,7 +884,6 @@
                     "title": "IP Protocol",
                     "description": "The IP protocol to which this rule applies. The value can be TCP, UDP, ICMP, or ALL.",
                     "type": "string",
-                    "widget": "Select",
                     "enum": [
                       "ALL",
                       "AH",
@@ -811,10 +903,8 @@
                   },
                   "ports": {
                     "type": "array",
-                    "widget": "GenericList",
                     "items": {
                       "type": "string",
-                      "deleteOnEmpty": true,
                       "maxLength": 0,
                       "pattern": "^(?!.*)"
                     },
@@ -829,7 +919,6 @@
           "title": "Protocol and Port list",
           "description": "A list of individual rules that define the behavior of the firewall rule based on specified conditions of protocol and port combinations.",
           "type": "array",
-          "widget": "SimpleList",
           "uniqueItems": true,
           "minItems": 1,
           "items": {
@@ -840,7 +929,6 @@
                 "title": "IP Protocol",
                 "description": "The IP protocol to which this rule applies. The value can be TCP, UDP, ICMP, or ALL.",
                 "type": "string",
-                "widget": "Select",
                 "enum": [
                   "ALL",
                   "AH",
@@ -884,7 +972,6 @@
                       "title": "IP Protocol",
                       "description": "The IP protocol to which this rule applies. The value can be TCP, UDP, ICMP, or ALL.",
                       "type": "string",
-                      "widget": "Select",
                       "enum": [
                         "ALL",
                         "AH",
@@ -906,7 +993,6 @@
                       "title": "Ports or Port-Ranges",
                       "description": "A list of ports or port-ranges to which the firewall rule will apply. If no port or port range is specified, all ranges are applied.",
                       "type": "array",
-                      "widget": "GenericList",
                       "items": {
                         "type": "string",
                         "oneOf": [
@@ -950,7 +1036,6 @@
                       "title": "IP Protocol",
                       "description": "The IP protocol to which this rule applies. The value can be TCP, UDP, ICMP, or ALL.",
                       "type": "string",
-                      "widget": "Select",
                       "enum": [
                         "ALL",
                         "AH",
@@ -970,10 +1055,8 @@
                     },
                     "ports": {
                       "type": "array",
-                      "widget": "GenericList",
                       "items": {
                         "type": "string",
-                        "deleteOnEmpty": true,
                         "maxLength": 0,
                         "pattern": "^(?!.*)"
                       },
@@ -1006,7 +1089,6 @@
               "title": "IP Protocol",
               "description": "The IP protocol to which this rule applies. The value can be TCP, UDP, ICMP, or ALL.",
               "type": "string",
-              "widget": "Select",
               "enum": [
                 "ALL",
                 "AH",
@@ -1026,10 +1108,8 @@
             },
             "ports": {
               "type": "array",
-              "widget": "GenericList",
               "items": {
                 "type": "string",
-                "deleteOnEmpty": true,
                 "maxLength": 0,
                 "pattern": "^(?!.*)"
               },
@@ -1046,7 +1126,6 @@
               "title": "IP Protocol",
               "description": "The IP protocol to which this rule applies. The value can be TCP, UDP, ICMP, or ALL.",
               "type": "string",
-              "widget": "Select",
               "enum": [
                 "ALL",
                 "AH",
@@ -1068,7 +1147,6 @@
               "title": "Ports or Port-Ranges",
               "description": "A list of ports or port-ranges to which the firewall rule will apply. If no port or port range is specified, all ranges are applied.",
               "type": "array",
-              "widget": "GenericList",
               "items": {
                 "type": "string",
                 "oneOf": [
@@ -1103,7 +1181,6 @@
           "title": "Sources",
           "type": "array",
           "description": "List of source specifications for the firewall rule. Can be an IP CIDR range, a tag, or a service account email.",
-          "widget": "GenericList",
           "items": {
             "type": "string",
             "oneOf": [
@@ -1117,7 +1194,7 @@
                 "pattern": "^(?:([0-9]|[1-9][0-9]{0,1}|1[0-9]{1,2}|2[0-4][0-9]|25[0-5])(\\.([0-9]|[1-9][0-9]{0,1}|1[0-9]{1,2}|2[0-4][0-9]|25[0-5])){3}/(([0-9]|[1-2][0-9]|3[0-2])))$"
               },
               {
-                "title": "Tag",
+                "title": "Network Tag",
                 "type": "string",
                 "description": "Strings added to a tags field in a resource, such as Compute Engine virtual machine (VM) instances or instance templates. Tags enable you to make firewall rules and routes applicable to specific VM instances.",
                 "pattern": "^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$",
@@ -1153,7 +1230,7 @@
           ]
         },
         "tag": {
-          "title": "Tag",
+          "title": "Network Tag",
           "type": "string",
           "description": "Strings added to a tags field in a resource, such as Compute Engine virtual machine (VM) instances or instance templates. Tags enable you to make firewall rules and routes applicable to specific VM instances.",
           "pattern": "^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$",
@@ -1170,7 +1247,6 @@
           "title": "Targets",
           "type": "array",
           "description": "List of target specifications for the firewall rule. Can be an IP CIDR range, a tag, or a service account email.",
-          "widget": "GenericList",
           "items": {
             "type": "string",
             "oneOf": [
@@ -1184,7 +1260,7 @@
                 "pattern": "^(?:([0-9]|[1-9][0-9]{0,1}|1[0-9]{1,2}|2[0-4][0-9]|25[0-5])(\\.([0-9]|[1-9][0-9]{0,1}|1[0-9]{1,2}|2[0-4][0-9]|25[0-5])){3}/(([0-9]|[1-2][0-9]|3[0-2])))$"
               },
               {
-                "title": "Tag",
+                "title": "Network Tag",
                 "type": "string",
                 "description": "Strings added to a tags field in a resource, such as Compute Engine virtual machine (VM) instances or instance templates. Tags enable you to make firewall rules and routes applicable to specific VM instances.",
                 "pattern": "^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$",

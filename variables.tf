@@ -48,7 +48,7 @@ variable "firewall_rules" {
     condition = alltrue([
       for value in flatten(var.firewall_rules[*].rules.*.ports) : (can(regex("^\\d+$", value)) || can(regex("^\\d+-\\d+$", value)))
     ])
-    error_message = "firewall_rule ports must contain a list of numbers or number ranges."
+    error_message = "firewall_rule ports must contain a list of ports or port-ranges."
   }
 
   validation {
@@ -58,7 +58,7 @@ variable "firewall_rules" {
         "deny"
       ], lower(value))
     ]) == length(var.firewall_rules)
-    error_message = "firewall_rule action must be one of 'allow' or 'deny'."
+    error_message = "firewall_rule action must be one of 'ALLOW' or 'DENY'."
   }
 }
 

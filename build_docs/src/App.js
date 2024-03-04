@@ -61,6 +61,7 @@ function App() {
   const [formData, setFormData] = useState({}); // Initial form data
   const [showModal, setShowModal] = useState(false);
   const [isInputValid, setIsInputValid] = useState(true);
+  const [validateSchema, setValidateSchema] = useState(true); // New state for toggling schema validation
   const [modalInputData, setModalInputData] = useState("");
   const [errorTitle, setErrorTitle] = useState('');
 
@@ -96,6 +97,11 @@ function App() {
       console.error('Failed to load JSON from clipboard:', err);
     }
   };
+
+  const toggleSchemaValidation = () => {
+    setValidateSchema(!validateSchema);
+  };
+
 
   // Used to track state for main form
   const handleFormDataChange = ({ formData }) => {
@@ -146,7 +152,13 @@ function App() {
     try {
       const inputData = JSON.parse(e.target.value);
       const valid = validate(inputData);
-      setIsInputValid(valid)
+      console.log(validateSchema)
+      if (validateSchema) {
+        setIsInputValid(valid)
+      } else {
+        setIsInputValid(true)
+      }
+
       if (!valid) {
         setErrorTitle(formatErrors(validate.errors));
       }

@@ -55,62 +55,108 @@
         },
         "allOf": [
             {
-                "title": "Service-Accounts and Network Tags Mixing Validation",
-                "description": "Ensures that if `Service-Accounts` are specified in either `Sources` or `Targets`, only `IP CIDR Ranges` or `Service-Accounts` can be included in them.",
+                "title": "Verify that Sources do not mix `Service-Accounts` and `Network Tags`",
                 "if": {
-                    "anyOf": [
-                        {
-                            "title": "Check for Service-Account in Sources",
-                            "description": "Validates the presence of a service account in the sources array.",
-                            "properties": {
-                                "sources": {
-                                    "type": "array",
-                                    "contains": {
-                                        "$ref": "#/definitions/shared/properties/service_account"
-                                    }
-                                }
-                            }
-                        },
-                        {
-                            "title": "Check for Service-Account in Targets",
-                            "description": "Validates the presence of a service account in the targets array.",
-                            "properties": {
-                                "targets": {
-                                    "type": "array",
-                                    "contains": {
-                                        "$ref": "#/definitions/shared/properties/service_account"
-                                    }
-                                }
-                            }
-                        }
-                    ]
-                },
-                "then": {
+                    "title": "IF: `Sources` contains `Service-Account`",
                     "properties": {
                         "sources": {
                             "type": "array",
-                            "items": {
-                                "oneOf": [
-                                    {
-                                        "$ref": "#/definitions/shared/properties/ip_cidr_range"
-                                    },
-                                    {
-                                        "$ref": "#/definitions/shared/properties/service_account"
-                                    }
-                                ]
+                            "contains": {
+                                "$ref": "#/definitions/shared/properties/service_account"
                             }
-                        },
+                        }
+                    }
+                },
+                "then": {
+                    "title": "THEN: `Sources` must NOT contain `Network Tag`",
+                    "properties": {
+                        "sources": {
+                            "type": "array",
+                            "contains": {
+                                "not": {
+                                    "$ref": "#/definitions/shared/properties/tag"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                "title": "Verify that Targets do not mix `Service-Accounts` and `Network Tags`",
+                "if": {
+                    "title": "IF: `Targets` contains `Service-Account`",
+                    "properties": {
                         "targets": {
                             "type": "array",
-                            "items": {
-                                "oneOf": [
-                                    {
-                                        "$ref": "#/definitions/shared/properties/ip_cidr_range"
-                                    },
-                                    {
-                                        "$ref": "#/definitions/shared/properties/service_account"
-                                    }
-                                ]
+                            "contains": {
+                                "$ref": "#/definitions/shared/properties/service_account"
+                            }
+                        }
+                    }
+                },
+                "then": {
+                    "title": "THEN: `Targets` must NOT contain `Network Tag`",
+                    "properties": {
+                        "targets": {
+                            "type": "array",
+                            "contains": {
+                                "not": {
+                                    "$ref": "#/definitions/shared/properties/tag"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                "title": "Verify that Source `Service-Accounts` do not mix with Target `Network Tags`",
+                "if": {
+                    "title": "IF: `Sourced` contains Service-Account",
+                    "properties": {
+                        "sources": {
+                            "type": "array",
+                            "contains": {
+                                "$ref": "#/definitions/shared/properties/service_account"
+                            }
+                        }
+                    }
+                },
+                "then": {
+                    "title": "THEN: `Targets` must NOT contain `Network Tag`",
+                    "properties": {
+                        "targets": {
+                            "type": "array",
+                            "contains": {
+                                "not": {
+                                    "$ref": "#/definitions/shared/properties/tag"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                "title": "Verify that Target `Service-Accounts` do not mix with Source `Network Tags`",
+                "if": {
+                    "title": "IF: `Targets` contains `Service-Account`",
+                    "properties": {
+                        "targets": {
+                            "type": "array",
+                            "contains": {
+                                "$ref": "#/definitions/shared/properties/service_account"
+                            }
+                        }
+                    }
+                },
+                "then": {
+                    "title": "THEN: `Sources` must NOT contain `Network Tag`",
+                    "properties": {
+                        "sources": {
+                            "type": "array",
+                            "contains": {
+                                "not": {
+                                    "$ref": "#/definitions/shared/properties/tag"
+                                }
                             }
                         }
                     }

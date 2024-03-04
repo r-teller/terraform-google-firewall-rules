@@ -1,48 +1,52 @@
 # Google Cloud VPC Firewall Rules
-This module that provides a simplified approach for creating/managing firewall rules in GCP leveraging JSON as the source of truth. 
+This Terraform module simplifies the creation and management of Google Cloud Platform (GCP) firewall rules using JSON configurations as the primary method for rule definition. It supports a variety of source and target specifications, enabling detailed control over network traffic.
 
-It supports mixed values in both the source and target JSON field and uses string matching to determine type, with types and logic listed below....
+It supports mixed values in both the source and target JSON fields and uses string matching to determine the type. The supported types and their determination logic are as follows:
 -  service_accounts = `if length(split("@", x)) > 1`
 -  tags             = `if length(split("@", x)) < 2 && !can(cidrnetmask(x))`
 -  subnet_ranges    = `if can(cidrnetmask(x))`
 
+**Important Note:** Mixing `service_accounts` and `tags` within the same rule is not supported. Each rule must exclusively use one type of identifier to ensure proper functionality and avoid configuration conflicts.
 
 ## JSON Generator
-https://r-teller.github.io/terraform-google-firewall-rules
+Generate your firewall rule configurations using our online tool:
+[Firewall Rules JSON Generator](https://r-teller.github.io/terraform-google-firewall-rules)
+
+- [Example Rule allowing TCP/UDP from IAP](https://r-teller.github.io/terraform-google-firewall-rules/?formData=W3siZGlzYWJsZWQiOmZhbHNlLCJhY3Rpb24iOiJBTExPVyIsImRpcmVjdGlvbiI6IklOR1JFU1MiLCJydWxlcyI6W3sicHJvdG9jb2wiOiJUQ1AiLCJwb3J0cyI6W119LHsicHJvdG9jb2wiOiJVRFAifV0sInNvdXJjZXMiOlsiMzUuMjM1LjI0MC4wLzIwIl0sInRhcmdldHMiOltdLCJwcmlvcml0eSI6NjU1MzAsImxvZ19jb25maWciOiJFWENMVURFX0FMTF9NRVRBREFUQSIsImlkIjoiZmZmYiIsImRlc2NyaXB0aW9uIjoiVGhpcyBydWxlIHdpbGwgYWxsb3cgSUFQIHJhbmdlcyBhY2Nlc3MgdG8gYWxsIFZNcyBvbiBhbGwgVENQL1VEUCBQb3J0cy4iLCJuYW1lIjoiYWxsb3ctYWxsLXRjcC11ZHAtZnJvbS1nY3AtaWFwIn1d)
 
 ## JSON Schema Documentation
-https://r-teller.github.io/terraform-google-firewall-rules/documentation/
+For detailed schema information and rule configuration options, visit:
+[Firewall Rules JSON Schema Documentation](https://r-teller.github.io/terraform-google-firewall-rules/documentation/)
 
 ## Include Implicit Addresses
 
-This module incorporates a feature to enhance clarity around the specification of source and destination addresses in firewall rules. By default, Google Cloud assumes the IPv4 address range of 0.0.0.0/0 (representing any IPv4 address) for any ingress rule without a specified source or any egress rule without a specified destination. To make this behavior explicit and enhance rule readability, this module automatically includes these default addresses as rule attributes.
+This module automatically includes the `0.0.0.0/0` IPv4 address range for unspecified sources in ingress rules and destinations in egress rules, aligning with Google Cloud's default behavior. This feature enhances rule clarity and can be toggled using the `include_implicit_addresses` variable.
 
 ### Configuring Implicit Address Inclusion
 
-The inclusion of default IPv4 address ranges can be controlled using the include_implicit_addresses variable:
+The inclusion of default IPv4 address ranges can be controlled using the `include_implicit_addresses` variable. This allows for two modes:
 
-- **Enabled (default)**: The module will automatically add `0.0.0.0/0` to the rule attributes for unspecified sources in ingress rules and unspecified destinations in egress rules, making the default behavior explicit.
- - Disabled: By setting `var.include_implicit_addresses` to `false`, users can opt out of this automatic inclusion, allowing for the manual specification of sources and destinations as needed.
+- **Enabled (default)**: The module will automatically add `0.0.0.0/0` to the rule attributes for unspecified sources in ingress rules and unspecified destinations in egress rules, making the default behavior explicit and ensuring comprehensive coverage.
+- **Disabled**: By setting `var.include_implicit_addresses` to `false`, users can opt out of this automatic inclusion.  This will not change how Google handles process the rules
 
 This functionality ensures that the module's behavior aligns with Google Cloud's default settings while offering users the option to customize how these defaults are represented in their firewall rule configurations.
 
-
 ## Combining Subnet Ranges with Service Accounts or Tags
-When specifying firewall rules it is possible to combine subnet_ranges with either service_accounts or tags enhances the flexibility and granularity of your network's security configuration for both ingress and egress traffic. If subnet_ranges are used in conjunction with service_accounts or tags, the rule applies to traffic originating from the specified IP ranges or to instances associated with the specified service accounts or tags. This combination allows for specifying rules that target both broad network segments (via IP ranges) and specific sets of instances (via service accounts or tags), ensuring precise and effective control over access and traffic flow within your network.
+When specifying firewall rules, it is possible to combine `subnet_ranges` with either `service_accounts` or `tags` to enhance the flexibility and granularity of your network's security configuration for both ingress and egress traffic. If `subnet_ranges` are used in conjunction with `service_accounts` or `tags`, the rule applies to traffic originating from the specified IP ranges or to instances associated with the specified service accounts or tags. This combination allows for specifying rules that target both broad network segments (via IP ranges) and specific sets of instances (via service accounts or tags), ensuring precise and effective control over access and traffic flow within your network.
 
-- For Ingress Traffic: Rule matches if the source of the traffic is within the specified subnet_ranges or if it originates from instances identified by the specified service_accounts or tags.
-- For Egress Traffic: Rule applies if the destination of the traffic is within the specified subnet_ranges or if it targets instances identified by the specified service_accounts or tags.
+- For Ingress Traffic: A rule matches if the source of the traffic is within the specified `subnet_ranges` or if it originates from instances identified by the specified `service_accounts` or `tags`.
+- For Egress Traffic: A rule applies if the destination of the traffic is within the specified `subnet_ranges` or if it targets instances identified by the specified `service_accounts` or `tags`.
 
-## Example Json Firewall Rule
-Firewall Rules must be formatted as valid JSON and added to a directory called `rules`. The `id` field is used to help uniquely identify the firewall rule within a specified environment,prefix,project when potential collisions could occur.
+## Example JSON Firewall Rule
+Firewall Rules must be formatted as valid JSON and added to a directory called `rules`. The `id` field is used to help uniquely identify the firewall rule within a specified environment, prefix, project when potential collisions could occur.
 
 ```json
 [
     {
         "id": "fffb",
         "description": "This rule will allow IAP ranges access to all VMs within 192.168.0.0/16 on all ports.",
-        "action": "allow",
-        "direction": "ingress",
+        "action": "ALLOW",
+        "direction": "INGRESS",
         "log_config": "EXCLUDE_ALL_METADATA",
         "priority": 65530,
         "sources": [
@@ -62,15 +66,19 @@ Firewall Rules must be formatted as valid JSON and added to a directory called `
 ```
 
 ## Usage
-Basic usage of this module is as follows:
+To use this module in your Terraform configuration, specify the source, project ID, network, and firewall rules as shown below:
+ 
 
 ```hcl
 locals {
   firewall_rule_path = "./rules"
   firewall_rule_sets = fileset(local.firewall_rule_path, "*.json")
   firewall_rules = flatten([for rules in local.firewall_rule_sets : [
-    for rule in jsondecode(file("${local.firewall_rule_path}/${rules}")) :
-    merge(rule, { fileName = split(".", rules)[0] })
+    for idx, rule in jsondecode(file("${local.firewall_rule_path}/${rules}")) :
+    merge(rule, { 
+      file_name = split(".", rules)[0], 
+      rule_index = idx 
+      })
     ]
   ])
 }
@@ -135,7 +143,7 @@ Additionally, the option to use legacy naming conventions has been added. This c
 | prefix      | This field denotes the prefix tag for firewall rule, used for dynamic name generation                                                                                                            | `String`                                                                | &check;         | N/A        |    no    |
 | id          | This field denotes an identifier for this rule within the json file, used for dynamic name generation                                                                                            | `String`                                                                | &check;         | N/A        |    no    |
 | description | Description of what the rule is intended to do                                                                                                                                                   | `String`                                                                |                 | `null`     |    no    |
-| action      | The action for the firewall rule                                                                                                                                                                 | `allow` or `deny`                                                       |                 | N/A        |   yes    |
+| action      | The action for the firewall rule                                                                                                                                                                 | `ALLOW` or `DENY`                                                       |                 | N/A        |   yes    |
 | direction   | The direction for the firewall rule                                                                                                                                                              | `INGRESS` or `EGRESS`                                                   |                 | `INGRESS`  |    no    |
 | log_config  | This field denotes whether logging is enabled and if to include or exclude metadata for firewall logs.                                                                                           | `EXCLUDE_ALL_METADATA`, `INCLUDE_ALL_METADATA` or `DISABLED`            |                 | `DISABLED` |    no    |
 | priority    | This field denotes whether to include or exclude metadata for firewall logs.                                                                                                                     | `Number`                                                                |                 | `1000`     |    no    |
@@ -194,3 +202,5 @@ project                network                        unmanaged firewall rule   
 rteller-demo-host-aaaa bridged-vpc-ic-remote-vpc-5b78 bridged-vpc-icr-echo-fw-5b78    False
 rteller-demo-host-aaaa bridged-vpc-ic-remote-vpc-5b78 bridged-vpc-icr-iap-fw-5b78     False
 ```
+
+
