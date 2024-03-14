@@ -3,15 +3,18 @@ import Form from '@rjsf/core';
 import Ajv from 'ajv';
 import validator from '@rjsf/validator-ajv8';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCopy, faEye, faBook, faShareAlt } from '@fortawesome/free-solid-svg-icons';
+import { faCopy, faEye, faBook, faShareAlt, faToggleOn, faToggleOff } from '@fortawesome/free-solid-svg-icons';
 import firewallRulesRawSchema from './schemas/JSONSchema.json';
 import firewallRulesUISchema from './schemas/UISchema.json';
 import './modal.css';
+import './main.css';
 import './firewall-rules.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 // Initialize AJV with options suitable for your needs
-const ajv = new Ajv({ strict: false, allErrors: true, useDefaults: true });
+const ajv = new Ajv({ strict: true, allErrors: true, useDefaults: true });
+const addFormats = require("ajv-formats")
+addFormats(ajv, ["email"])
 const validate = ajv.compile(firewallRulesRawSchema);
 
 const schema = {
@@ -21,12 +24,7 @@ const schema = {
   }
 };
 
-const uiSchema = {
-  'firewall_rules': firewallRulesUISchema,
-  'ui:submitButtonOptions': {
-    norender: true
-  },
-};
+
 
 function DescriptionFieldTemplate(props) {
   return null; // Ensure you have a valid return for all your components, even if null
@@ -35,7 +33,7 @@ function DescriptionFieldTemplate(props) {
 function formatErrors(errors) {
   return errors
     .filter(error => error.keyword !== 'const' && error.keyword !== 'x') // Good practice to filter out unnecessary errors
-    .map(error => `${error.instancePath}, ${error.schemaPath}, ${error.message}`)
+    .map(error => `${error.instancePath} => ${error.schemaPath}`)
     .join('\n'); // Joining errors with newline for better readability
 }
 
@@ -43,9 +41,38 @@ function App() {
   const [formData, setFormData] = useState({});
   const [showModal, setShowModal] = useState(false);
   const [isInputValid, setIsInputValid] = useState(true);
+  const [liveValidate, setLiveValidate] = useState(true);
   const [validateSchema, setValidateSchema] = useState(true);
   const [modalInputData, setModalInputData] = useState("");
   const [errorTitle, setErrorTitle] = useState('');
+
+
+  // const uiSchema = {
+  //   'firewall_rules': firewallRulesUISchema,
+  //   'ui:submitButtonOptions': {
+  //     norender: { liveValidate },
+  //     submitText: "Validate"
+  //   },
+  // };
+
+  const [uiSchema, setUiSchema] = useState({
+    'firewall_rules': firewallRulesUISchema,
+    'ui:submitButtonOptions': {
+      norender: liveValidate,
+      submitText: "Validate"
+    },
+  });
+
+  useEffect(() => {
+    // Update the uiSchema whenever liveValidate changes 
+    setUiSchema({
+      'firewall_rules': firewallRulesUISchema,
+      'ui:submitButtonOptions': {
+        norender: liveValidate,
+        submitText: "Validate"
+      },
+    });
+  }, [liveValidate]); // This effect runs when `liveValidate` changes
 
   // Reset form data to initial state
   const resetFormData = () => {
@@ -83,6 +110,12 @@ function App() {
   };
 
   // Toggle schema validation
+  const toggleLiveValidator = () => {
+    setLiveValidate(!liveValidate);
+  };
+
+
+  // Toggle schema validation
   const toggleSchemaValidation = () => {
     setValidateSchema(!validateSchema);
   };
@@ -115,6 +148,7 @@ function App() {
     setFormData(formData);
   };
 
+  // Parse Query Param and load state into form
   useEffect(() => {
     const parseAndCleanQueryParams = () => {
       const queryParams = new URLSearchParams(window.location.search);
@@ -131,7 +165,7 @@ function App() {
         }
       }
     };
-  
+
     parseAndCleanQueryParams();
   }, []);
 
@@ -153,17 +187,22 @@ function App() {
   };
 
   return (
-    <div className="App container mt-5">
-      <center style={{ paddingBottom: '15px' }}>
+    <div className="App container mt-5 split-screen">
+      <div className="top-pane">
+        {/* <center style={{ paddingBottom: '15px' }}> */}
         {/* Button actions */}
+        {/* Validation Toggle Button */}
+        <button onClick={toggleLiveValidator} className={`btn btn-lg ${liveValidate ? 'btn-success' : 'btn-danger'}`} title="Toggle Validation">
+          <FontAwesomeIcon icon={liveValidate ? faToggleOn : faToggleOff} /> Live Validation
+        </button>
         <button onClick={shareFormData} className="btn btn-info btn-lg" title="Share FormData">
-          <FontAwesomeIcon icon={faShareAlt} /> Share FormData
+          <FontAwesomeIcon icon={faShareAlt} /> Share
         </button>
         <button onClick={() => copyJsonToClipboard(formData)} className="btn btn-info btn-lg" title="Copy to Clipboard">
-          <FontAwesomeIcon icon={faCopy} /> Copy FormData
+          <FontAwesomeIcon icon={faCopy} /> Copy
         </button>
         <button onClick={toggleModal} className="btn btn-info btn-lg" title="View JSON">
-          <FontAwesomeIcon icon={faEye} /> Edit / View FormData
+          <FontAwesomeIcon icon={faEye} /> Edit / View
         </button>
         <button onClick={() => window.open(document.location.pathname + "./documentation", "_blank")} className="btn btn-info btn-lg" title="View Documentation">
           <FontAwesomeIcon icon={faBook} /> View Documentation
@@ -171,7 +210,8 @@ function App() {
         <button onClick={resetFormData} className="btn btn-danger btn-lg" title="Reset Form">
           Reset Form
         </button>
-      </center>
+        {/* </center> */}
+      </div>
 
       {/* Modal for editing/viewing JSON */}
       {showModal && (
@@ -218,18 +258,19 @@ function App() {
         </div>
       )}
       {showModal && <div className="modal-backdrop fade in"></div>}
-
-      <Form
-        schema={schema}
-        uiSchema={uiSchema}
-        formData={formData}
-        onChange={handleFormDataChange}
-        liveValidate
-        validator={validator}
-        templates={{
-          DescriptionFieldTemplate,
-        }}
-      />
+      <div className="bottom-pane">
+        <Form
+          schema={schema}
+          uiSchema={uiSchema}
+          formData={formData}
+          onChange={handleFormDataChange}
+          liveValidate={liveValidate}
+          validator={validator}
+          templates={{
+            DescriptionFieldTemplate,
+          }}
+        />
+      </div>
     </div>
   );
 }

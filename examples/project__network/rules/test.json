@@ -1,0 +1,19 @@
+[
+    {
+      "disabled": false,
+      "action": "ALLOW",
+      "direction": "INGRESS",
+      "rules": [
+        {
+          "protocol": "TCP"
+        }
+      ],
+      "sources": ["aa"],
+      "targets": [
+        "aaaa@a.com"
+      ],
+      "priority": 1000,
+      "log_config": "DISABLED",
+      "description": "asdfasdfasdfasfd"
+    }
+  ]

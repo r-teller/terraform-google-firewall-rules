@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/terraform-google-firewall-rules/static/css/main.fead28b5.css",
-    "main.js": "/terraform-google-firewall-rules/static/js/main.485d0768.js",
+    "main.js": "/terraform-google-firewall-rules/static/js/main.71d689da.js",
     "static/js/453.0e5eec9b.chunk.js": "/terraform-google-firewall-rules/static/js/453.0e5eec9b.chunk.js",
     "static/media/glyphicons-halflings-regular.svg": "/terraform-google-firewall-rules/static/media/glyphicons-halflings-regular.060b2710bdbbe3dfe48b.svg",
     "static/media/glyphicons-halflings-regular.ttf": "/terraform-google-firewall-rules/static/media/glyphicons-halflings-regular.4692b9ec53fd5972caa2.ttf",
@@ -10,11 +10,11 @@
     "static/media/glyphicons-halflings-regular.woff2": "/terraform-google-firewall-rules/static/media/glyphicons-halflings-regular.be810be3a3e14c682a25.woff2",
     "index.html": "/terraform-google-firewall-rules/index.html",
     "main.fead28b5.css.map": "/terraform-google-firewall-rules/static/css/main.fead28b5.css.map",
-    "main.485d0768.js.map": "/terraform-google-firewall-rules/static/js/main.485d0768.js.map",
+    "main.71d689da.js.map": "/terraform-google-firewall-rules/static/js/main.71d689da.js.map",
     "453.0e5eec9b.chunk.js.map": "/terraform-google-firewall-rules/static/js/453.0e5eec9b.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.fead28b5.css",
-    "static/js/main.485d0768.js"
+    "static/js/main.71d689da.js"
   ]
 }

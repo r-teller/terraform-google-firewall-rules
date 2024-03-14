@@ -1,0 +1,20 @@
+[
+    {
+        "id": "invalid-02-ipv6",
+        "description": "may drop leading zeros, but not trailing zeros within any 16-bit chunk of the address",
+        "action": "ALLOW",
+        "direction": "INGRESS",
+        "log_config": "EXCLUDE_ALL_METADATA",
+        "priority": 1000,
+        "sources": [
+            "12AB:0:0:CD3/60"
+        ],
+        "targets": [],
+        "rules": [
+            {
+                "protocol": "TCP",
+                "ports": []
+            }
+        ]
+    }
+]

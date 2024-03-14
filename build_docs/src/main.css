@@ -1,0 +1,27 @@
+/* Ensure the top pane stays fixed at the top and is centered */
+.top-pane {
+    display: flex; /* Use flexbox to center children */
+    justify-content: center; /* Center children horizontally */
+    align-items: center; /* Center children vertically */
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0; /* Stretch to the full width */
+    z-index: 100;
+    background-color: #fff;
+}
+
+/* Add padding to the top of the body to prevent the fixed top pane from covering content */
+body {
+    padding-top: 50px;
+    /* Adjust this value to match the actual height of the top pane */
+}
+
+/* Style the bottom pane to allow for scrolling */
+.bottom-pane {
+    margin-top: 20px;
+    /* width: 100%; */
+    height: calc(100vh - 100px);
+    /* Adjust this value to match the actual height of the top pane */
+    /* overflow-y: auto; */
+}

@@ -48,15 +48,18 @@ locals {
     rule_direction = upper(coalesce(firewall_rule.direction, local.defaults_firewall_rule.direction))
     disabled       = coalesce(firewall_rule.disabled, local.defaults_firewall_rule.disabled)
 
-    source_service_accounts = [for x in firewall_rule.sources : trimspace(x) if length(split("@", trimspace(x))) > 1 && !can(cidrnetmask(trimspace(x)))]
-    source_tags             = [for x in firewall_rule.sources : trimspace(x) if length(split("@", trimspace(x))) < 2 && !can(cidrnetmask(trimspace(x)))]
-    source_cidrs            = [for x in firewall_rule.sources : trimspace(x) if can(cidrnetmask(trimspace(x)))]
+    source_service_accounts = [for x in firewall_rule.sources : trimspace(x) if length(split("@", trimspace(x))) > 1 && !can(cidrsubnet(trimspace(x), 0, 0))]
+    source_tags             = [for x in firewall_rule.sources : trimspace(x) if length(split("@", trimspace(x))) < 2 && !can(cidrsubnet(trimspace(x), 0, 0))]
+    source_cidrs            = [for x in firewall_rule.sources : trimspace(x) if can(cidrsubnet(trimspace(x), 0, 0))]
 
-    target_service_accounts = [for x in firewall_rule.targets : trimspace(x) if length(split("@", trimspace(x))) > 1 && !can(cidrnetmask(trimspace(x)))]
-    target_tags             = [for x in firewall_rule.targets : trimspace(x) if length(split("@", trimspace(x))) < 2 && !can(cidrnetmask(trimspace(x)))]
-    target_cidrs            = [for x in firewall_rule.targets : trimspace(x) if can(cidrnetmask(trimspace(x)))]
+    
 
-
+    target_service_accounts = [for x in firewall_rule.targets : trimspace(x) if length(split("@", trimspace(x))) > 1 && !can(cidrsubnet(trimspace(x), 0, 0))]
+    target_tags             = [for x in firewall_rule.targets : trimspace(x) if length(split("@", trimspace(x))) < 2 && !can(cidrsubnet(trimspace(x), 0, 0))]
+    target_cidrs            = [for x in firewall_rule.targets : trimspace(x) if can(cidrsubnet(trimspace(x), 0, 0))]
+# cidrsubnet("fd00:fd12:3456:7890::/56", 0, 0)
+# cidrsubnet("::/0", 0, 0)
+# can(cidrhost("fd00:fd12:3456:7890:00a2::/72", 0))
     log_config = coalesce(upper(firewall_rule.log_config), local.defaults_firewall_rule.log_config)
     rules      = try(firewall_rule.rules, null)
   }]
@@ -87,8 +90,11 @@ locals {
       NAME        = var.override_dynamic_naming.include_name ? firewall_rule.name : null,
       ID          = var.override_dynamic_naming.include_id ? firewall_rule.id : null,
       } : format("%s=%s", k2, v2) if v2 != null]))) => merge(firewall_rule, {
-      source_ranges = length(concat(firewall_rule.source_service_accounts, firewall_rule.source_tags, firewall_rule.source_cidrs)) > 0 ? firewall_rule.source_cidrs : var.include_implicit_addresses ? ["0.0.0.0/0"] : []
-      target_ranges = length(concat(firewall_rule.target_service_accounts, firewall_rule.target_tags, firewall_rule.target_cidrs)) > 0 ? firewall_rule.target_cidrs : var.include_implicit_addresses ? ["0.0.0.0/0"] : []
+      # source_ranges = length(concat(firewall_rule.source_service_accounts, firewall_rule.source_tags, firewall_rule.source_cidrs)) > 0 ? firewall_rule.source_cidrs : var.include_implicit_addresses ? ["0.0.0.0/0"] : []
+      # target_ranges = length(concat(firewall_rule.target_service_accounts, firewall_rule.target_tags, firewall_rule.target_cidrs)) > 0 ? firewall_rule.target_cidrs : var.include_implicit_addresses ? ["0.0.0.0/0"] : []
+
+      source_ranges = length(concat(firewall_rule.source_service_accounts, firewall_rule.source_tags, firewall_rule.source_cidrs)) > 0 ? firewall_rule.source_cidrs : var.include_implicit_addresses ? (strcontains(join("", firewall_rule.target_cidrs), "::") ? ["::/0"] : ["0.0.0.0/0"]) : []
+      target_ranges = length(concat(firewall_rule.target_service_accounts, firewall_rule.target_tags, firewall_rule.target_cidrs)) > 0 ? firewall_rule.target_cidrs : var.include_implicit_addresses ? (strcontains(join("", firewall_rule.source_cidrs), "::") ? ["::/0"] : ["0.0.0.0/0"]) : []
     })
   }
 }

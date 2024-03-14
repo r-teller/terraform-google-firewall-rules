@@ -1,4 +1,5 @@
 {
+    "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "firewall_rules.schema.json",
     "title": "Collection of Firewall Rules",
     "type": "array",
@@ -56,7 +57,7 @@
         "allOf": [
             {
                 "title": "Service-Accounts and Network Tags Mixing Validation",
-                "description": "Ensures that if `Service-Accounts` are specified in either `Sources` or `Targets`, only `IP CIDR Ranges` or `Service-Accounts` can be included in them.",
+                "description": "Ensures that `Service-Accounts` and `Network Tags` are not mixed within either `Sources` or `Targets`",
                 "if": {
                     "anyOf": [
                         {
@@ -92,7 +93,10 @@
                             "items": {
                                 "oneOf": [
                                     {
-                                        "$ref": "#/definitions/shared/properties/ip_cidr_range"
+                                        "$ref": "#/definitions/shared/properties/ipv4_cidr_range"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/shared/properties/ipv6_cidr_range"
                                     },
                                     {
                                         "$ref": "#/definitions/shared/properties/service_account"
@@ -105,7 +109,78 @@
                             "items": {
                                 "oneOf": [
                                     {
-                                        "$ref": "#/definitions/shared/properties/ip_cidr_range"
+                                        "$ref": "#/definitions/shared/properties/ipv4_cidr_range"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/shared/properties/ipv6_cidr_range"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/shared/properties/service_account"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                "title": "IPv4 and IPv6 Mixing Validation",
+                "description": "Ensures that `IPv4` and `IPv6` addresses are not mixed within either `Sources` or `Targets`",
+                "if": {
+                    "anyOf": [
+                        {
+                            "title": "Check for IPv6 Address in Sources",
+                            "description": "Validates the presence of an IPv6 address in the sources array.",
+                            "properties": {
+                                "sources": {    
+                                    "type": "array",
+                                    "contains": {
+                                        "$ref": "#/definitions/shared/properties/ipv6_cidr_range"
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            "title": "Check for IPv6 Address in Targets",
+                            "description": "Validates the presence of an IPv6 address in the targets array.",
+                            "properties": {
+                                "targets": {
+                                    "type": "array",
+                                    "contains": {
+                                        "$ref": "#/definitions/shared/properties/ipv6_cidr_range"
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                },
+                "then": {
+                    "properties": {
+                        "sources": {
+                            "type": "array",
+                            "items": {
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/definitions/shared/properties/tag"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/shared/properties/ipv6_cidr_range"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/shared/properties/service_account"
+                                    }
+                                ]
+                            }
+                        },
+                        "targets": {
+                            "type": "array",
+                            "items": {
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/definitions/shared/properties/tag"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/shared/properties/ipv6_cidr_range"
                                     },
                                     {
                                         "$ref": "#/definitions/shared/properties/service_account"
@@ -250,6 +325,24 @@
                         "192.168.0.0/24"
                     ],
                     "pattern": "^(?:([0-9]|[1-9][0-9]{0,1}|1[0-9]{1,2}|2[0-4][0-9]|25[0-5])(\\.([0-9]|[1-9][0-9]{0,1}|1[0-9]{1,2}|2[0-4][0-9]|25[0-5])){3}/(([0-9]|[1-2][0-9]|3[0-2])))$"
+                },
+                "ipv4_cidr_range": {
+                    "title": "IPv4 CIDR Range",
+                    "type": "string",
+                    "description": "IP space allocated to this subnetwork in IPv4 CIDR format.",
+                    "pattern": "^(?:(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)\\.){3}(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)/([0-9]|[1-2][0-9]|3[0-2])$",
+                    "examples": [
+                        "192.168.0.0/24"
+                    ]
+                },
+                "ipv6_cidr_range": {
+                    "title": "IPv6 CIDR Range",
+                    "type": "string",
+                    "description": "IP space allocated to this subnetwork in IPv6 CIDR format.",
+                    "pattern": "^((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|(:[0-9]{1,3}\\.){3}[0-9]{1,3}|:))|(([0-9A-Fa-f]{1,4}:){5}((:[0-9A-Fa-f]{1,4}){1,2}|(:[0-9]{1,3}\\.){3}[0-9]{1,3}|:))|(([0-9A-Fa-f]{1,4}:){4}((:[0-9A-Fa-f]{1,4}){1,3}|(:[0-9]{1,3}\\.){3}[0-9]{1,3}|:))|(([0-9A-Fa-f]{1,4}:){3}((:[0-9A-Fa-f]{1,4}){1,4}|(:[0-9]{1,3}\\.){3}[0-9]{1,3}|:))|(([0-9A-Fa-f]{1,4}:){2}((:[0-9A-Fa-f]{1,4}){1,5}|(:[0-9]{1,3}\\.){3}[0-9]{1,3}|:))|(([0-9A-Fa-f]{1,4}:){1}((:[0-9A-Fa-f]{1,4}){1,6}|(:[0-9]{1,3}\\.){3}[0-9]{1,3}|:))|(:(:|((:[0-9A-Fa-f]{1,4}){1,7}|(:[0-9]{1,3}\\.){3}[0-9]{1,3}))))(\\/(0|[1-9][0-9]?|1[0-1][0-9]|12[0-8]))$",
+                    "examples": [
+                        "fd00:fd12:3456:7890::/56"
+                    ]
                 },
                 "name": {
                     "title": "Name",
@@ -459,7 +552,7 @@
                     "title": "Service Account",
                     "description": "The email address of a service account. Firewall rules can target or be applied based on service accounts.",
                     "type": "string",
-                    "pattern": "^\\S+@\\S+\\.\\S+$",
+                    "format": "email",
                     "maxLength": 63,
                     "examples": [
                         "project-number-compute@developer.gserviceaccount.com",
@@ -475,7 +568,10 @@
                         "type": "string",
                         "oneOf": [
                             {
-                                "$ref": "#/definitions/shared/properties/ip_cidr_range"
+                                "$ref": "#/definitions/shared/properties/ipv4_cidr_range"
+                            },
+                            {
+                                "$ref": "#/definitions/shared/properties/ipv6_cidr_range"
                             },
                             {
                                 "$ref": "#/definitions/shared/properties/tag"
@@ -515,7 +611,10 @@
                         "type": "string",
                         "oneOf": [
                             {
-                                "$ref": "#/definitions/shared/properties/ip_cidr_range"
+                                "$ref": "#/definitions/shared/properties/ipv4_cidr_range"
+                            },
+                            {
+                                "$ref": "#/definitions/shared/properties/ipv6_cidr_range"
                             },
                             {
                                 "$ref": "#/definitions/shared/properties/tag"

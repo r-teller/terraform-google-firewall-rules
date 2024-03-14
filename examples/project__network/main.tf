@@ -9,9 +9,9 @@ locals {
 }
 
 module "firewall_rules" {
-  # source = "../.."
-  source  = "r-teller/firewall-rules/google"
-  version = ">=3.0.0"
+  source = "../.."
+  # source  = "r-teller/firewall-rules/google"
+  # version = ">=3.0.0"
 
   ## Optional field and can be explicitly specified here or within the firewall_rule
   project_id = var.project_id
