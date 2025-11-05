@@ -20,14 +20,24 @@ For detailed schema information and rule configuration options, visit:
 
 ## Include Implicit Addresses
 
-This module automatically includes the `0.0.0.0/0` IPv4 address range for unspecified sources in ingress rules and destinations in egress rules, aligning with Google Cloud's default behavior. This feature enhances rule clarity and can be toggled using the `include_implicit_addresses` variable.
+This module automatically includes default address ranges for unspecified sources in ingress rules and destinations in egress rules, aligning with Google Cloud's default behavior. This feature enhances rule clarity and can be toggled using the `include_implicit_addresses` variable.
 
 ### Configuring Implicit Address Inclusion
 
-The inclusion of default IPv4 address ranges can be controlled using the `include_implicit_addresses` variable. This allows for two modes:
+The inclusion of default address ranges can be controlled using the `include_implicit_addresses` variable in combination with the `ip_version` variable. This allows for flexible configuration:
 
-- **Enabled (default)**: The module will automatically add `0.0.0.0/0` to the rule attributes for unspecified sources in ingress rules and unspecified destinations in egress rules, making the default behavior explicit and ensuring comprehensive coverage.
-- **Disabled**: By setting `var.include_implicit_addresses` to `false`, users can opt out of this automatic inclusion.  This will not change how Google handles process the rules
+- **Enabled (default)**: The module will automatically add default address ranges to the rule attributes for unspecified sources in ingress rules and unspecified destinations in egress rules, making the default behavior explicit and ensuring comprehensive coverage.
+- **Disabled**: By setting `var.include_implicit_addresses` to `false`, users can opt out of this automatic inclusion. This will not change how Google handles or processes the rules.
+
+### IPv6 Support
+
+This module supports IPv4, IPv6, and dual-stack configurations through the `ip_version` variable:
+
+- **IPV4_ONLY (default)**: Uses `0.0.0.0/0` for implicit addresses (backward compatible)
+- **IPV6_ONLY**: Uses `::/0` for implicit addresses
+- **DUAL_STACK**: Uses both `0.0.0.0/0` and `::/0` for implicit addresses
+
+You can specify IPv6 CIDR ranges directly in your firewall rules' sources and targets fields. The module's CIDR detection automatically recognizes both IPv4 and IPv6 formats.
 
 This functionality ensures that the module's behavior aligns with Google Cloud's default settings while offering users the option to customize how these defaults are represented in their firewall rule configurations.
 
@@ -40,6 +50,7 @@ When specifying firewall rules, it is possible to combine `subnet_ranges` with e
 ## Example JSON Firewall Rule
 Firewall Rules must be formatted as valid JSON and added to a directory called `rules`. The `id` field is used to help uniquely identify the firewall rule within a specified environment, prefix, project when potential collisions could occur.
 
+### IPv4 Example
 ```json
 [
     {
@@ -59,6 +70,55 @@ Firewall Rules must be formatted as valid JSON and added to a directory called `
             {
                 "protocol": "TCP",
                 "ports": []
+            }
+        ]
+    }
+]
+```
+
+### IPv6 Example
+```json
+[
+    {
+        "id": "ipv6-ssh",
+        "description": "Allow SSH from specific IPv6 range to all VMs",
+        "action": "ALLOW",
+        "direction": "INGRESS",
+        "log_config": "EXCLUDE_ALL_METADATA",
+        "priority": 1000,
+        "sources": [
+            "2001:db8::/32"
+        ],
+        "targets": [],
+        "rules": [
+            {
+                "protocol": "TCP",
+                "ports": ["22"]
+            }
+        ]
+    }
+]
+```
+
+### Dual-Stack Example
+```json
+[
+    {
+        "id": "dual-stack-https",
+        "description": "Allow HTTPS from both IPv4 and IPv6 ranges",
+        "action": "ALLOW",
+        "direction": "INGRESS",
+        "log_config": "DISABLED",
+        "priority": 1000,
+        "sources": [
+            "10.0.0.0/8",
+            "2001:db8::/32"
+        ],
+        "targets": [],
+        "rules": [
+            {
+                "protocol": "TCP",
+                "ports": ["443"]
             }
         ]
     }
@@ -94,6 +154,10 @@ module "firewall_rules" {
   # Optional field used to include implicit sources within Firewall rules
   include_implicit_addresses = true
 
+  # Optional field to control IP version for implicit addresses
+  # Options: "IPV4_ONLY" (default), "IPV6_ONLY", "DUAL_STACK"
+  ip_version = "IPV4_ONLY"
+
   # Optional field for using legacy dynamic naming
   use_legacy_naming = false
 
@@ -105,7 +169,7 @@ module "firewall_rules" {
     include_network     = true
     include_name        = true
     include_id          = true
-  }  
+  }
 }
 ```
 
@@ -115,16 +179,17 @@ The dynamic naming for firewall rules has been updated to provide more flexibili
 Additionally, the option to use legacy naming conventions has been added. This can be toggled with the `var.use_legacy_naming` variable, allowing users to choose between the new dynamic naming scheme or the previous static method based on UUID generation.
 
 ## Module Inputs
-| Name                       | Description                                                                                        | Type     | Required |
-| -------------------------- | -------------------------------------------------------------------------------------------------- | -------- | :------: |
-| project_id                 | Project id of the project that holds the network.                                                  | `string` |    no    |
-| network                    | Name of the network this set of firewall rules applies to.                                         | `string` |    no    |
-| prefix                     | This field denotes the prefix tag for firewall rule, used for dynamic name generation.             | `string` |    no    |
-| environment                | This field denotes the environment tag for firewall rule, used for dynamic name generation.        | `string` |    no    |
-| firewall_rules             | Firewall Rule object to be passed to the Firewall Rules Module                                     | `object` |   yes    |
-| include_implicit_addresses | Toggle to include implicit source or target addresses within firewall rules.                       | `bool`   |    no    |
-| use_legacy_naming          | Toggle to use legacy naming conventions for firewall rules.                                        | `bool`   |    no    |
-| override_dynamic_naming    | Configuration object for dynamic naming of firewall rules, specifying which attributes to include. | `object` |    no    |
+| Name                       | Description                                                                                                                         | Type     | Default      | Required |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | -------- | ------------ | :------: |
+| project_id                 | Project id of the project that holds the network.                                                                                   | `string` | `null`       |    no    |
+| network                    | Name of the network this set of firewall rules applies to.                                                                          | `string` | `null`       |    no    |
+| prefix                     | This field denotes the prefix tag for firewall rule, used for dynamic name generation.                                              | `string` | `null`       |    no    |
+| environment                | This field denotes the environment tag for firewall rule, used for dynamic name generation.                                         | `string` | `null`       |    no    |
+| firewall_rules             | Firewall Rule object to be passed to the Firewall Rules Module                                                                      | `object` | N/A          |   yes    |
+| include_implicit_addresses | Toggle to include implicit source or target addresses within firewall rules based on ip_version setting.                            | `bool`   | `true`       |    no    |
+| ip_version                 | IP version for implicit addresses. Options: IPV4_ONLY, IPV6_ONLY, DUAL_STACK                                                        | `string` | `IPV4_ONLY`  |    no    |
+| use_legacy_naming          | Toggle to use legacy naming conventions for firewall rules.                                                                         | `bool`   | `false`      |    no    |
+| override_dynamic_naming    | Configuration object for dynamic naming of firewall rules, specifying which attributes to include.                                  | `object` | See below    |    no    |
 
 >*Note:* 
 >- `project_id`, `network`, `prefix` & `environment` can be overloaded within the firewall_rules object

@@ -80,9 +80,24 @@ variable "use_legacy_naming" {
 }
 
 variable "include_implicit_addresses" {
-  description = "When a source or destination specification is ommited from in an ingress or egress rule, Google Cloud uses the default source IPv4 address range 0.0.0.0/0 (any IPv4 address). This flag includes it as an explicit confiugration attribute"
+  description = "When a source or destination specification is ommited from in an ingress or egress rule, Google Cloud uses the default source address ranges. This flag includes them as explicit configuration attributes based on the ip_version setting."
   type        = bool
   default     = true
+}
+
+variable "ip_version" {
+  description = "IP version to use for implicit addresses. IPV4_ONLY includes only 0.0.0.0/0, IPV6_ONLY includes only ::/0, DUAL_STACK includes both IPv4 and IPv6 default ranges."
+  type        = string
+  default     = "IPV4_ONLY"
+
+  validation {
+    condition = contains([
+      "IPV4_ONLY",
+      "IPV6_ONLY",
+      "DUAL_STACK"
+    ], var.ip_version)
+    error_message = "ip_version must be one of 'IPV4_ONLY', 'IPV6_ONLY', or 'DUAL_STACK'."
+  }
 }
 
 variable "override_dynamic_naming" {

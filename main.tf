@@ -1,4 +1,12 @@
 locals {
+  # Determine default implicit address ranges based on IP version setting
+  implicit_address_ranges = var.include_implicit_addresses ? (
+    var.ip_version == "IPV4_ONLY" ? ["0.0.0.0/0"] :
+    var.ip_version == "IPV6_ONLY" ? ["::/0"] :
+    var.ip_version == "DUAL_STACK" ? ["0.0.0.0/0", "::/0"] :
+    []
+  ) : []
+
   defaults_firewall_rule = {
     name        = "UNKNOWN",
     id          = "UNKNOWN",
@@ -71,8 +79,8 @@ locals {
         firewall_rule.name,
         firewall_rule.id,
       ))) => merge(firewall_rule, {
-      source_ranges = length(concat(firewall_rule.source_service_accounts, firewall_rule.source_tags, firewall_rule.source_cidrs)) > 0 ? firewall_rule.source_cidrs : var.include_implicit_addresses ? ["0.0.0.0/0"] : []
-      target_ranges = length(concat(firewall_rule.target_service_accounts, firewall_rule.target_tags, firewall_rule.target_cidrs)) > 0 ? firewall_rule.target_cidrs : var.include_implicit_addresses ? ["0.0.0.0/0"] : []
+      source_ranges = length(concat(firewall_rule.source_service_accounts, firewall_rule.source_tags, firewall_rule.source_cidrs)) > 0 ? firewall_rule.source_cidrs : local.implicit_address_ranges
+      target_ranges = length(concat(firewall_rule.target_service_accounts, firewall_rule.target_tags, firewall_rule.target_cidrs)) > 0 ? firewall_rule.target_cidrs : local.implicit_address_ranges
     })
   }
 
@@ -87,8 +95,8 @@ locals {
       NAME        = var.override_dynamic_naming.include_name ? firewall_rule.name : null,
       ID          = var.override_dynamic_naming.include_id ? firewall_rule.id : null,
       } : format("%s=%s", k2, v2) if v2 != null]))) => merge(firewall_rule, {
-      source_ranges = length(concat(firewall_rule.source_service_accounts, firewall_rule.source_tags, firewall_rule.source_cidrs)) > 0 ? firewall_rule.source_cidrs : var.include_implicit_addresses ? ["0.0.0.0/0"] : []
-      target_ranges = length(concat(firewall_rule.target_service_accounts, firewall_rule.target_tags, firewall_rule.target_cidrs)) > 0 ? firewall_rule.target_cidrs : var.include_implicit_addresses ? ["0.0.0.0/0"] : []
+      source_ranges = length(concat(firewall_rule.source_service_accounts, firewall_rule.source_tags, firewall_rule.source_cidrs)) > 0 ? firewall_rule.source_cidrs : local.implicit_address_ranges
+      target_ranges = length(concat(firewall_rule.target_service_accounts, firewall_rule.target_tags, firewall_rule.target_cidrs)) > 0 ? firewall_rule.target_cidrs : local.implicit_address_ranges
     })
   }
 }

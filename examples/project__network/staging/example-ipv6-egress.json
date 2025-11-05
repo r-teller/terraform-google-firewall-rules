@@ -1,0 +1,44 @@
+[
+    {
+        "id": "ipv6-egress-dns",
+        "description": "Allow DNS queries over IPv6 from all VMs",
+        "action": "ALLOW",
+        "direction": "EGRESS",
+        "log_config": "DISABLED",
+        "priority": 1000,
+        "sources": [],
+        "targets": [
+            "::/0"
+        ],
+        "rules": [
+            {
+                "protocol": "TCP",
+                "ports": ["53"]
+            },
+            {
+                "protocol": "UDP",
+                "ports": ["53"]
+            }
+        ]
+    },
+    {
+        "id": "ipv6-egress-restricted",
+        "description": "Deny egress to specific IPv6 range from restricted VMs",
+        "action": "DENY",
+        "direction": "EGRESS",
+        "log_config": "INCLUDE_ALL_METADATA",
+        "priority": 500,
+        "sources": [
+            "restricted-vm"
+        ],
+        "targets": [
+            "2001:db8:bad::/48"
+        ],
+        "rules": [
+            {
+                "protocol": "ALL",
+                "ports": []
+            }
+        ]
+    }
+]
