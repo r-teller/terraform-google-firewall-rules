@@ -86,17 +86,16 @@ variable "include_implicit_addresses" {
 }
 
 variable "ip_version" {
-  description = "IP version to use for implicit addresses. IPV4_ONLY includes only 0.0.0.0/0, IPV6_ONLY includes only ::/0, DUAL_STACK includes both IPv4 and IPv6 default ranges."
+  description = "IP version to use for implicit addresses when sources or destinations are not specified. GCP firewall rules are single-stack only (either IPv4 or IPv6, not both)."
   type        = string
-  default     = "IPV4_ONLY"
+  default     = "IPV4"
 
   validation {
     condition = contains([
-      "IPV4_ONLY",
-      "IPV6_ONLY",
-      "DUAL_STACK"
+      "IPV4",
+      "IPV6"
     ], var.ip_version)
-    error_message = "ip_version must be one of 'IPV4_ONLY', 'IPV6_ONLY', or 'DUAL_STACK'."
+    error_message = "ip_version must be one of 'IPV4' or 'IPV6'. GCP does not support dual-stack firewall rules."
   }
 }
 

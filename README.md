@@ -31,13 +31,14 @@ The inclusion of default address ranges can be controlled using the `include_imp
 
 ### IPv6 Support
 
-This module supports IPv4, IPv6, and dual-stack configurations through the `ip_version` variable:
+This module supports both IPv4 and IPv6 firewall rules through the `ip_version` variable:
 
-- **IPV4_ONLY (default)**: Uses `0.0.0.0/0` for implicit addresses (backward compatible)
-- **IPV6_ONLY**: Uses `::/0` for implicit addresses
-- **DUAL_STACK**: Uses both `0.0.0.0/0` and `::/0` for implicit addresses
+- **IPV4 (default)**: Uses `0.0.0.0/0` for implicit addresses (backward compatible)
+- **IPV6**: Uses `::/0` for implicit addresses
 
-You can specify IPv6 CIDR ranges directly in your firewall rules' sources and targets fields. The module's CIDR detection automatically recognizes both IPv4 and IPv6 formats.
+**Important**: GCP firewall rules are **single-stack only** - each rule can use either IPv4 or IPv6 addresses, not both. To support both IP versions, create separate firewall rules for each.
+
+You can specify IPv6 CIDR ranges directly in your firewall rules' sources and targets fields. The module's CIDR detection automatically recognizes both IPv4 and IPv6 formats using Terraform's `cidrsubnet()` function.
 
 This functionality ensures that the module's behavior aligns with Google Cloud's default settings while offering users the option to customize how these defaults are represented in their firewall rule configurations.
 
@@ -100,18 +101,37 @@ Firewall Rules must be formatted as valid JSON and added to a directory called `
 ]
 ```
 
-### Dual-Stack Example
+### Supporting Both IPv4 and IPv6
+Since GCP requires separate rules for IPv4 and IPv6, create two rules:
+
 ```json
 [
     {
-        "id": "dual-stack-https",
-        "description": "Allow HTTPS from both IPv4 and IPv6 ranges",
+        "id": "https-ipv4",
+        "description": "Allow HTTPS from IPv4 addresses",
         "action": "ALLOW",
         "direction": "INGRESS",
         "log_config": "DISABLED",
         "priority": 1000,
         "sources": [
-            "10.0.0.0/8",
+            "10.0.0.0/8"
+        ],
+        "targets": [],
+        "rules": [
+            {
+                "protocol": "TCP",
+                "ports": ["443"]
+            }
+        ]
+    },
+    {
+        "id": "https-ipv6",
+        "description": "Allow HTTPS from IPv6 addresses",
+        "action": "ALLOW",
+        "direction": "INGRESS",
+        "log_config": "DISABLED",
+        "priority": 1000,
+        "sources": [
             "2001:db8::/32"
         ],
         "targets": [],
@@ -155,8 +175,9 @@ module "firewall_rules" {
   include_implicit_addresses = true
 
   # Optional field to control IP version for implicit addresses
-  # Options: "IPV4_ONLY" (default), "IPV6_ONLY", "DUAL_STACK"
-  ip_version = "IPV4_ONLY"
+  # Options: "IPV4" (default), "IPV6"
+  # Note: GCP firewall rules are single-stack only
+  ip_version = "IPV4"
 
   # Optional field for using legacy dynamic naming
   use_legacy_naming = false
@@ -187,7 +208,7 @@ Additionally, the option to use legacy naming conventions has been added. This c
 | environment                | This field denotes the environment tag for firewall rule, used for dynamic name generation.                                         | `string` | `null`       |    no    |
 | firewall_rules             | Firewall Rule object to be passed to the Firewall Rules Module                                                                      | `object` | N/A          |   yes    |
 | include_implicit_addresses | Toggle to include implicit source or target addresses within firewall rules based on ip_version setting.                            | `bool`   | `true`       |    no    |
-| ip_version                 | IP version for implicit addresses. Options: IPV4_ONLY, IPV6_ONLY, DUAL_STACK                                                        | `string` | `IPV4_ONLY`  |    no    |
+| ip_version                 | IP version for implicit addresses. Options: IPV4, IPV6. GCP firewall rules are single-stack only.                                   | `string` | `IPV4`       |    no    |
 | use_legacy_naming          | Toggle to use legacy naming conventions for firewall rules.                                                                         | `bool`   | `false`      |    no    |
 | override_dynamic_naming    | Configuration object for dynamic naming of firewall rules, specifying which attributes to include.                                  | `object` | See below    |    no    |
 
