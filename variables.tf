@@ -60,6 +60,28 @@ variable "firewall_rules" {
     ]) == length(var.firewall_rules)
     error_message = "firewall_rule action must be one of 'ALLOW' or 'DENY'."
   }
+
+  validation {
+    condition = alltrue([
+      for rule in var.firewall_rules : (
+        # Get all CIDRs from both sources and targets
+        length([
+          for item in concat(rule.sources, rule.targets) : item
+          if can(cidrsubnet(item, 0, 0))
+        ]) == 0 ? true : ( # No CIDRs, skip validation
+          # Check if all CIDRs are the same IP version (all have :: or none have ::)
+          alltrue([
+            for item in concat(rule.sources, rule.targets) : strcontains(item, "::")
+            if can(cidrsubnet(item, 0, 0))
+          ]) || alltrue([
+            for item in concat(rule.sources, rule.targets) : !strcontains(item, "::")
+            if can(cidrsubnet(item, 0, 0))
+          ])
+        )
+      )
+    ])
+    error_message = "Cannot mix IPv4 and IPv6 CIDRs in the same firewall rule. GCP firewall rules are single-stack only - each rule must use either IPv4 or IPv6 addresses, not both. Create separate rules for each IP version."
+  }
 }
 
 variable "project_id" {
@@ -85,8 +107,8 @@ variable "include_implicit_addresses" {
   default     = true
 }
 
-variable "ip_version" {
-  description = "IP version to use for implicit addresses when sources or destinations are not specified. AUTO (default) automatically detects the IP version based on specified CIDRs in the rule. IPV4 or IPV6 can be used to explicitly override auto-detection. GCP firewall rules are single-stack only (either IPv4 or IPv6, not both)."
+variable "implicit_ip_version" {
+  description = "IP version to use for implicit addresses when sources or destinations contain only tags or service accounts (no CIDRs). Only applies when include_implicit_addresses is true. AUTO (default) automatically detects the IP version based on CIDRs in the opposite field (source or destination). IPV4 or IPV6 can be used to explicitly override auto-detection. GCP firewall rules are single-stack only (either IPv4 or IPv6, not both)."
   type        = string
   default     = "AUTO"
 
@@ -95,8 +117,8 @@ variable "ip_version" {
       "AUTO",
       "IPV4",
       "IPV6"
-    ], var.ip_version)
-    error_message = "ip_version must be one of 'AUTO' (default), 'IPV4', or 'IPV6'. GCP does not support dual-stack firewall rules."
+    ], var.implicit_ip_version)
+    error_message = "implicit_ip_version must be one of 'AUTO' (default), 'IPV4', or 'IPV6'. GCP does not support dual-stack firewall rules."
   }
 }
 
