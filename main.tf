@@ -1,13 +1,9 @@
 locals {
-  # Determine default implicit address ranges based on IP version setting
+  # Default implicit address ranges based on IP version setting
   # GCP firewall rules are single-stack only (either IPv4 or IPv6, not both)
-  # When implicit_ip_version is AUTO, we use null to signal per-rule auto-detection
-  # Implicit addresses are only added when tags/service-accounts are present
-  implicit_address_ranges = !var.include_implicit_addresses ? [] : (
-    var.implicit_ip_version == "AUTO" ? null :
-    var.implicit_ip_version == "IPV4" ? ["0.0.0.0/0"] :
-    ["::/0"]
-  )
+  # This is used as a fallback when no CIDRs are present to infer from
+  implicit_default_ipv4 = ["0.0.0.0/0"]
+  implicit_default_ipv6 = ["::/0"]
 
   defaults_firewall_rule = {
     name        = "UNKNOWN",
@@ -81,24 +77,28 @@ locals {
         firewall_rule.name,
         firewall_rule.id,
       ))) => merge(firewall_rule, {
-      # Only add implicit addresses when tags/service-accounts are present (not when everything is empty)
-      # If CIDRs exist, use them; otherwise check if tags/SAs exist to add implicit addresses
+      # Only add implicit addresses when tags/service-accounts are present
+      # Logic: 1) Use CIDRs if present, 2) Infer from opposite field, 3) Use implicit_ip_version default
       source_ranges = length(firewall_rule.source_cidrs) > 0 ? firewall_rule.source_cidrs : (
-        length(concat(firewall_rule.source_service_accounts, firewall_rule.source_tags)) > 0 ? (
-          local.implicit_address_ranges != null ? local.implicit_address_ranges :
-          # AUTO mode: detect from target_cidrs, default to IPv4 if no targets
+        length(concat(firewall_rule.source_service_accounts, firewall_rule.source_tags)) > 0 && var.include_implicit_addresses ? (
+          # Infer from target_cidrs if available
           length(firewall_rule.target_cidrs) > 0 ? (
-            strcontains(join("", firewall_rule.target_cidrs), "::") ? ["::/0"] : ["0.0.0.0/0"]
-          ) : ["0.0.0.0/0"]
+            strcontains(join("", firewall_rule.target_cidrs), "::") ? local.implicit_default_ipv6 : local.implicit_default_ipv4
+          ) : (
+            # No CIDRs to infer from, use variable default
+            var.implicit_ip_version == "IPV6" ? local.implicit_default_ipv6 : local.implicit_default_ipv4
+          )
         ) : []
       )
       target_ranges = length(firewall_rule.target_cidrs) > 0 ? firewall_rule.target_cidrs : (
-        length(concat(firewall_rule.target_service_accounts, firewall_rule.target_tags)) > 0 ? (
-          local.implicit_address_ranges != null ? local.implicit_address_ranges :
-          # AUTO mode: detect from source_cidrs, default to IPv4 if no sources
+        length(concat(firewall_rule.target_service_accounts, firewall_rule.target_tags)) > 0 && var.include_implicit_addresses ? (
+          # Infer from source_cidrs if available
           length(firewall_rule.source_cidrs) > 0 ? (
-            strcontains(join("", firewall_rule.source_cidrs), "::") ? ["::/0"] : ["0.0.0.0/0"]
-          ) : ["0.0.0.0/0"]
+            strcontains(join("", firewall_rule.source_cidrs), "::") ? local.implicit_default_ipv6 : local.implicit_default_ipv4
+          ) : (
+            # No CIDRs to infer from, use variable default
+            var.implicit_ip_version == "IPV6" ? local.implicit_default_ipv6 : local.implicit_default_ipv4
+          )
         ) : []
       )
     })
@@ -115,24 +115,28 @@ locals {
       NAME        = var.override_dynamic_naming.include_name ? firewall_rule.name : null,
       ID          = var.override_dynamic_naming.include_id ? firewall_rule.id : null,
       } : format("%s=%s", k2, v2) if v2 != null]))) => merge(firewall_rule, {
-      # Only add implicit addresses when tags/service-accounts are present (not when everything is empty)
-      # If CIDRs exist, use them; otherwise check if tags/SAs exist to add implicit addresses
+      # Only add implicit addresses when tags/service-accounts are present
+      # Logic: 1) Use CIDRs if present, 2) Infer from opposite field, 3) Use implicit_ip_version default
       source_ranges = length(firewall_rule.source_cidrs) > 0 ? firewall_rule.source_cidrs : (
-        length(concat(firewall_rule.source_service_accounts, firewall_rule.source_tags)) > 0 ? (
-          local.implicit_address_ranges != null ? local.implicit_address_ranges :
-          # AUTO mode: detect from target_cidrs, default to IPv4 if no targets
+        length(concat(firewall_rule.source_service_accounts, firewall_rule.source_tags)) > 0 && var.include_implicit_addresses ? (
+          # Infer from target_cidrs if available
           length(firewall_rule.target_cidrs) > 0 ? (
-            strcontains(join("", firewall_rule.target_cidrs), "::") ? ["::/0"] : ["0.0.0.0/0"]
-          ) : ["0.0.0.0/0"]
+            strcontains(join("", firewall_rule.target_cidrs), "::") ? local.implicit_default_ipv6 : local.implicit_default_ipv4
+          ) : (
+            # No CIDRs to infer from, use variable default
+            var.implicit_ip_version == "IPV6" ? local.implicit_default_ipv6 : local.implicit_default_ipv4
+          )
         ) : []
       )
       target_ranges = length(firewall_rule.target_cidrs) > 0 ? firewall_rule.target_cidrs : (
-        length(concat(firewall_rule.target_service_accounts, firewall_rule.target_tags)) > 0 ? (
-          local.implicit_address_ranges != null ? local.implicit_address_ranges :
-          # AUTO mode: detect from source_cidrs, default to IPv4 if no sources
+        length(concat(firewall_rule.target_service_accounts, firewall_rule.target_tags)) > 0 && var.include_implicit_addresses ? (
+          # Infer from source_cidrs if available
           length(firewall_rule.source_cidrs) > 0 ? (
-            strcontains(join("", firewall_rule.source_cidrs), "::") ? ["::/0"] : ["0.0.0.0/0"]
-          ) : ["0.0.0.0/0"]
+            strcontains(join("", firewall_rule.source_cidrs), "::") ? local.implicit_default_ipv6 : local.implicit_default_ipv4
+          ) : (
+            # No CIDRs to infer from, use variable default
+            var.implicit_ip_version == "IPV6" ? local.implicit_default_ipv6 : local.implicit_default_ipv4
+          )
         ) : []
       )
     })

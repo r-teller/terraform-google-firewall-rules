@@ -108,17 +108,16 @@ variable "include_implicit_addresses" {
 }
 
 variable "implicit_ip_version" {
-  description = "IP version to use for implicit addresses when sources or destinations contain only tags or service accounts (no CIDRs). Only applies when include_implicit_addresses is true. AUTO (default) automatically detects the IP version based on CIDRs in the opposite field (source or destination). IPV4 or IPV6 can be used to explicitly override auto-detection. GCP firewall rules are single-stack only (either IPv4 or IPv6, not both)."
+  description = "Default IP version to use for implicit addresses when sources or destinations contain only tags or service accounts (no CIDRs to infer from). The module will always try to infer the IP version from existing CIDRs first before using this default. Only applies when include_implicit_addresses is true. GCP firewall rules are single-stack only (either IPv4 or IPv6, not both)."
   type        = string
-  default     = "AUTO"
+  default     = "IPV4"
 
   validation {
     condition = contains([
-      "AUTO",
       "IPV4",
       "IPV6"
     ], var.implicit_ip_version)
-    error_message = "implicit_ip_version must be one of 'AUTO' (default), 'IPV4', or 'IPV6'. GCP does not support dual-stack firewall rules."
+    error_message = "implicit_ip_version must be 'IPV4' or 'IPV6'. The module automatically infers IP version from existing CIDRs when possible."
   }
 }
 
