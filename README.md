@@ -33,14 +33,43 @@ The inclusion of default address ranges can be controlled using the `include_imp
 
 This module supports both IPv4 and IPv6 firewall rules through the `ip_version` variable:
 
-- **IPV4 (default)**: Uses `0.0.0.0/0` for implicit addresses (backward compatible)
-- **IPV6**: Uses `::/0` for implicit addresses
+- **AUTO (default)**: Automatically detects the IP version based on CIDRs specified in the rule. When sources or targets are unspecified, the module checks the opposite field for IPv6 addresses (`::`). If found, it uses `::/0` as the default; otherwise, it uses `0.0.0.0/0`. This prevents mixing IPv4 and IPv6 in the same rule.
+- **IPV4**: Explicitly uses `0.0.0.0/0` for implicit addresses
+- **IPV6**: Explicitly uses `::/0` for implicit addresses
 
 **Important**: GCP firewall rules are **single-stack only** - each rule can use either IPv4 or IPv6 addresses, not both. To support both IP versions, create separate firewall rules for each.
 
-You can specify IPv6 CIDR ranges directly in your firewall rules' sources and targets fields. The module's CIDR detection automatically recognizes both IPv4 and IPv6 formats using Terraform's `cidrsubnet()` function.
+#### Auto-Detection Examples
 
-This functionality ensures that the module's behavior aligns with Google Cloud's default settings while offering users the option to customize how these defaults are represented in their firewall rule configurations.
+With `ip_version = "AUTO"` (default):
+
+```json
+// IPv6 detected from targets → sources default to ::/0
+{
+  "sources": [],
+  "targets": ["fd00::/8"],
+  "rules": [...]
+}
+// Result: sources = ["::/0"], targets = ["fd00::/8"] ✅
+
+// No IPv6 detected → defaults to IPv4
+{
+  "sources": [],
+  "targets": ["web-server"],  // tag, not CIDR
+  "rules": [...]
+}
+// Result: sources = ["0.0.0.0/0"], targets = [] ✅
+
+// IPv4 detected from sources → targets default to 0.0.0.0/0
+{
+  "sources": ["10.0.0.0/8"],
+  "targets": [],
+  "rules": [...]
+}
+// Result: sources = ["10.0.0.0/8"], targets = ["0.0.0.0/0"] ✅
+```
+
+You can specify IPv6 CIDR ranges directly in your firewall rules' sources and targets fields. The module's CIDR detection automatically recognizes both IPv4 and IPv6 formats using Terraform's `cidrsubnet()` function.
 
 ## Combining Subnet Ranges with Service Accounts or Tags
 When specifying firewall rules, it is possible to combine `subnet_ranges` with either `service_accounts` or `tags` to enhance the flexibility and granularity of your network's security configuration for both ingress and egress traffic. If `subnet_ranges` are used in conjunction with `service_accounts` or `tags`, the rule applies to traffic originating from the specified IP ranges or to instances associated with the specified service accounts or tags. This combination allows for specifying rules that target both broad network segments (via IP ranges) and specific sets of instances (via service accounts or tags), ensuring precise and effective control over access and traffic flow within your network.
@@ -175,9 +204,9 @@ module "firewall_rules" {
   include_implicit_addresses = true
 
   # Optional field to control IP version for implicit addresses
-  # Options: "IPV4" (default), "IPV6"
+  # Options: "AUTO" (default - auto-detects from rule CIDRs), "IPV4", "IPV6"
   # Note: GCP firewall rules are single-stack only
-  ip_version = "IPV4"
+  ip_version = "AUTO"
 
   # Optional field for using legacy dynamic naming
   use_legacy_naming = false
@@ -208,7 +237,7 @@ Additionally, the option to use legacy naming conventions has been added. This c
 | environment                | This field denotes the environment tag for firewall rule, used for dynamic name generation.                                         | `string` | `null`       |    no    |
 | firewall_rules             | Firewall Rule object to be passed to the Firewall Rules Module                                                                      | `object` | N/A          |   yes    |
 | include_implicit_addresses | Toggle to include implicit source or target addresses within firewall rules based on ip_version setting.                            | `bool`   | `true`       |    no    |
-| ip_version                 | IP version for implicit addresses. Options: IPV4, IPV6. GCP firewall rules are single-stack only.                                   | `string` | `IPV4`       |    no    |
+| ip_version                 | IP version for implicit addresses. AUTO auto-detects from rule CIDRs. Options: AUTO, IPV4, IPV6. GCP firewall rules are single-stack only. | `string` | `AUTO`       |    no    |
 | use_legacy_naming          | Toggle to use legacy naming conventions for firewall rules.                                                                         | `bool`   | `false`      |    no    |
 | override_dynamic_naming    | Configuration object for dynamic naming of firewall rules, specifying which attributes to include.                                  | `object` | See below    |    no    |
 

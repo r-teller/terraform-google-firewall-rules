@@ -1,9 +1,12 @@
 locals {
   # Determine default implicit address ranges based on IP version setting
   # GCP firewall rules are single-stack only (either IPv4 or IPv6, not both)
-  implicit_address_ranges = var.include_implicit_addresses ? (
-    var.ip_version == "IPV4" ? ["0.0.0.0/0"] : ["::/0"]
-  ) : []
+  # When ip_version is AUTO, we use null to signal per-rule auto-detection
+  implicit_address_ranges = !var.include_implicit_addresses ? [] : (
+    var.ip_version == "AUTO" ? null :
+    var.ip_version == "IPV4" ? ["0.0.0.0/0"] :
+    ["::/0"]
+  )
 
   defaults_firewall_rule = {
     name        = "UNKNOWN",
@@ -77,8 +80,18 @@ locals {
         firewall_rule.name,
         firewall_rule.id,
       ))) => merge(firewall_rule, {
-      source_ranges = length(concat(firewall_rule.source_service_accounts, firewall_rule.source_tags, firewall_rule.source_cidrs)) > 0 ? firewall_rule.source_cidrs : local.implicit_address_ranges
-      target_ranges = length(concat(firewall_rule.target_service_accounts, firewall_rule.target_tags, firewall_rule.target_cidrs)) > 0 ? firewall_rule.target_cidrs : local.implicit_address_ranges
+      # When ip_version is AUTO (implicit_address_ranges is null), auto-detect from the opposite field
+      # Otherwise use the explicit implicit_address_ranges
+      source_ranges = length(concat(firewall_rule.source_service_accounts, firewall_rule.source_tags, firewall_rule.source_cidrs)) > 0 ? firewall_rule.source_cidrs : (
+        local.implicit_address_ranges != null ? local.implicit_address_ranges :
+        # AUTO mode: detect from target_cidrs
+        strcontains(join("", firewall_rule.target_cidrs), "::") ? ["::/0"] : ["0.0.0.0/0"]
+      )
+      target_ranges = length(concat(firewall_rule.target_service_accounts, firewall_rule.target_tags, firewall_rule.target_cidrs)) > 0 ? firewall_rule.target_cidrs : (
+        local.implicit_address_ranges != null ? local.implicit_address_ranges :
+        # AUTO mode: detect from source_cidrs
+        strcontains(join("", firewall_rule.source_cidrs), "::") ? ["::/0"] : ["0.0.0.0/0"]
+      )
     })
   }
 
@@ -93,8 +106,18 @@ locals {
       NAME        = var.override_dynamic_naming.include_name ? firewall_rule.name : null,
       ID          = var.override_dynamic_naming.include_id ? firewall_rule.id : null,
       } : format("%s=%s", k2, v2) if v2 != null]))) => merge(firewall_rule, {
-      source_ranges = length(concat(firewall_rule.source_service_accounts, firewall_rule.source_tags, firewall_rule.source_cidrs)) > 0 ? firewall_rule.source_cidrs : local.implicit_address_ranges
-      target_ranges = length(concat(firewall_rule.target_service_accounts, firewall_rule.target_tags, firewall_rule.target_cidrs)) > 0 ? firewall_rule.target_cidrs : local.implicit_address_ranges
+      # When ip_version is AUTO (implicit_address_ranges is null), auto-detect from the opposite field
+      # Otherwise use the explicit implicit_address_ranges
+      source_ranges = length(concat(firewall_rule.source_service_accounts, firewall_rule.source_tags, firewall_rule.source_cidrs)) > 0 ? firewall_rule.source_cidrs : (
+        local.implicit_address_ranges != null ? local.implicit_address_ranges :
+        # AUTO mode: detect from target_cidrs
+        strcontains(join("", firewall_rule.target_cidrs), "::") ? ["::/0"] : ["0.0.0.0/0"]
+      )
+      target_ranges = length(concat(firewall_rule.target_service_accounts, firewall_rule.target_tags, firewall_rule.target_cidrs)) > 0 ? firewall_rule.target_cidrs : (
+        local.implicit_address_ranges != null ? local.implicit_address_ranges :
+        # AUTO mode: detect from source_cidrs
+        strcontains(join("", firewall_rule.source_cidrs), "::") ? ["::/0"] : ["0.0.0.0/0"]
+      )
     })
   }
 }
